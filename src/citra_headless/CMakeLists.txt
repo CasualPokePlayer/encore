@@ -35,7 +35,7 @@ create_target_directory_groups(citra-headless)
 
 target_link_libraries(citra-headless PRIVATE citra_common citra_core input_common network)
 target_link_libraries(citra-headless PRIVATE Boost::serialization glad libzstd_static)
-target_link_libraries(citra-headless PRIVATE ${PLATFORM_LIBRARIES} SDL2::SDL2 Threads::Threads)
+target_link_libraries(citra-headless PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads)
 set_target_properties(citra-headless PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ENABLE_LTO})
 
 if (CITRA_USE_PRECOMPILED_HEADERS)
