@@ -105,6 +105,8 @@ public:
     Sink& GetSink();
     /// Enable/Disable audio stretching.
     void EnableStretching(bool enable);
+    /// Get the internal FIFO
+    Common::RingBuffer<s16, 0x2000, 2>& GetFifo();
 
 protected:
     void OutputFrame(StereoFrame16 frame);

@@ -74,6 +74,8 @@ CMAKE_DEPENDENT_OPTION(ENABLE_DEDICATED_ROOM "Enable generating dedicated room e
 option(ENABLE_WEB_SERVICE "Enable web services (telemetry, etc.)" ON)
 option(ENABLE_SCRIPTING "Enable RPC server for scripting" ON)
 
+option(ENABLE_HEADLESS "Enable the headless shared library" OFF)
+
 CMAKE_DEPENDENT_OPTION(ENABLE_CUBEB "Enables the cubeb audio backend" ON "NOT IOS" OFF)
 option(ENABLE_OPENAL "Enables the OpenAL audio backend" ON)
 
@@ -103,7 +105,7 @@ if (CITRA_USE_PRECOMPILED_HEADERS)
     endif()
 endif()
 
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit)
+if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/.git AND NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit)
     message(STATUS "Copying pre-commit hook")
     file(COPY hooks/pre-commit
         DESTINATION ${PROJECT_SOURCE_DIR}/.git/hooks)

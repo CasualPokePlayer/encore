@@ -200,3 +200,7 @@ endif()
 if (ENABLE_WEB_SERVICE)
     add_subdirectory(web_service)
 endif()
+
+if (ENABLE_HEADLESS)
+    add_subdirectory(citra_headless)
+endif()
