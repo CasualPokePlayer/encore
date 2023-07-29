@@ -7,7 +7,7 @@
 using namespace Headless;
 
 EmuWindow_Headless::EmuWindow_Headless(Core::System& system_) : EmuWindow(false), system(system_) {
-    strict_context_required = true;
+    strict_context_required = false;
     frame_has_passed = false;
 }
 

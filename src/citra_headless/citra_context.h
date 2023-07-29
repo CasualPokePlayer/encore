@@ -17,7 +17,7 @@ public:
                  InputCallbackInterface& input_interface);
     ~CitraContext();
 
-    std::pair<bool, std::string> InstallCIA(const std::string& cia_path, bool force);
+    std::pair<bool, std::string> InstallCIA(const std::string& cia_path);
     std::optional<std::string> LoadROM(const std::string& rom_path);
     void RunFrame();
     void Reset();
@@ -29,6 +29,8 @@ public:
     std::size_t StartSaveState();
     void FinishSaveState(void* dest_buffer);
     void LoadState(void* src_buffer, std::size_t buffer_len) const;
+    std::pair<const u8*, std::size_t> GetMemoryRegion(Memory::Region region) const;
+    std::tuple<Common::Rectangle<u32>, bool, bool> GetTouchScreenLayout() const;
 
 private:
     Core::System& system;

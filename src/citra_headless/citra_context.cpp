@@ -7,11 +7,11 @@
 
 #include "audio_core/dsp_interface.h"
 #include "common/logging/backend.h"
-#include "common/zstd_compression.h"
 #include "core/core.h"
 #include "core/frontend/applets/default_applets.h"
 #include "core/frontend/input.h"
 #include "core/hle/service/am/am.h"
+#include "core/hw/aes/key.h"
 #include "network/network.h"
 #include "video_core/renderer_base.h"
 #include "video_core/renderer_opengl/gl_state.h"
@@ -48,6 +48,8 @@ CitraContext::CitraContext(ConfigCallbackInterface& config_interface,
         "headless", std::make_shared<HeadlessTouchFactory>(input_interface));
     Input::RegisterFactory<Input::MotionDevice>(
         "headless", std::make_shared<HeadlessMotionFactory>(input_interface));
+    // we may have set a new aes_keys.txt, force reload it
+    HW::AES::InitKeys(true);
 }
 
 CitraContext::~CitraContext() {
@@ -62,7 +64,7 @@ CitraContext::~CitraContext() {
     Input::UnregisterFactory<Input::MotionDevice>("headless");
 }
 
-std::pair<bool, std::string> CitraContext::InstallCIA(const std::string& cia_path, bool force) {
+std::pair<bool, std::string> CitraContext::InstallCIA(const std::string& cia_path) {
     FileSys::CIAContainer container;
     const auto container_result = container.Load(cia_path);
     switch (container_result) {
@@ -110,18 +112,15 @@ std::pair<bool, std::string> CitraContext::InstallCIA(const std::string& cia_pat
         return "Failed to get loader for .app file";
     };
 
-    // if the CIA is already installed we might be able to trying to install it
-    // we'll let the user force install it if need be
-    if (!force) {
-        const auto& installed_path = get_installed_path();
-        if (FileUtil::Exists(installed_path)) {
-            const auto& executable_result = is_executable(installed_path);
-            if (executable_result) {
-                return std::make_pair(false, *executable_result);
-            }
-
-            return std::make_pair(true, installed_path);
+    // if the CIA is already installed, don't reinstall it
+    const auto& maybe_installed_path = get_installed_path();
+    if (FileUtil::Exists(maybe_installed_path)) {
+        const auto& maybe_executable_result = is_executable(maybe_installed_path);
+        if (maybe_executable_result) {
+            return std::make_pair(false, *maybe_executable_result);
         }
+
+        return std::make_pair(true, maybe_installed_path);
     }
 
     const auto install_result = Service::AM::InstallCIA(cia_path);
@@ -232,4 +231,32 @@ void CitraContext::FinishSaveState(void* dest_buffer) {
 void CitraContext::LoadState(void* src_buffer, std::size_t buffer_len) const {
     window->MakeCurrent();
     savestate_mt->LoadState(src_buffer, buffer_len);
+}
+
+std::pair<const u8*, std::size_t> CitraContext::GetMemoryRegion(Memory::Region region) const {
+    const auto is_n3ds = Settings::values.is_new_3ds.GetValue();
+    switch (region) {
+    case Memory::Region::FCRAM:
+        return std::make_pair(system.Memory().GetPhysicalPointer(Memory::FCRAM_PADDR),
+                              is_n3ds ? Memory::FCRAM_N3DS_SIZE : Memory::FCRAM_SIZE);
+    case Memory::Region::VRAM:
+        return std::make_pair(system.Memory().GetPhysicalPointer(Memory::VRAM_PADDR),
+                              Memory::VRAM_SIZE);
+    case Memory::Region::DSP:
+        return std::make_pair(system.Memory().GetPhysicalPointer(Memory::DSP_RAM_PADDR),
+                              Memory::DSP_RAM_SIZE);
+    case Memory::Region::N3DS:
+        return std::make_pair(system.Memory().GetPhysicalPointer(Memory::N3DS_EXTRA_RAM_PADDR),
+                              is_n3ds ? Memory::N3DS_EXTRA_RAM_SIZE : 0);
+    default:
+        UNREACHABLE();
+    }
+}
+
+std::tuple<Common::Rectangle<u32>, bool, bool> CitraContext::GetTouchScreenLayout() const {
+    const auto& layout = window->GetFramebufferLayout();
+    // keep in mind is_rotated is true if in "normal" orientation
+    // as the 3DS displays in a rotated manner internally, which is rotated again for "normal"
+    // orientation
+    return std::make_tuple(layout.bottom_screen, !layout.is_rotated, layout.bottom_screen_enabled);
 }

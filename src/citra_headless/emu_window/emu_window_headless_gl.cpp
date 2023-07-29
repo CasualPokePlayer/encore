@@ -42,8 +42,7 @@ EmuWindow_Headless_GL::EmuWindow_Headless_GL(Core::System& system, u32 window_sc
     const auto& layout = GetFramebufferLayout();
     width = layout.width;
     height = layout.height;
-    // ASSERT(gladLoadGLLoader(static_cast<GLADloadproc>(gl_interface.GetGLProcAddress)));
-    gladLoadGL();
+    ASSERT(gladLoadGLLoader(static_cast<GLADloadproc>(gl_interface.GetGLProcAddress)));
     final_texture_fbo.Create();
     final_texture_pbo.Create();
     ResetGLTexture();

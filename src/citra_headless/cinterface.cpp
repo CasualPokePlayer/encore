@@ -22,9 +22,9 @@ CITRA_EXPORT void Citra_DestroyContext(CitraContext* context) {
     delete context;
 }
 
-CITRA_EXPORT bool Citra_InstallCIA(CitraContext* context, const char* cia_path, bool force,
-                                   char* string_buffer, u32 string_size) {
-    const auto& result = context->InstallCIA(cia_path, force);
+CITRA_EXPORT bool Citra_InstallCIA(CitraContext* context, const char* cia_path, char* string_buffer,
+                                   u32 string_size) {
+    const auto& result = context->InstallCIA(cia_path);
     const auto& msg = std::get<std::string>(result);
     auto len = std::min(msg.length(), static_cast<std::size_t>(string_size - 1));
     std::memcpy(string_buffer, msg.c_str(), len);
@@ -88,4 +88,23 @@ CITRA_EXPORT void Citra_FinishSaveState(CitraContext* context, void* dest_buffer
 
 CITRA_EXPORT void Citra_LoadState(CitraContext* context, void* src_buffer, u32 buffer_len) {
     context->LoadState(src_buffer, buffer_len);
+}
+
+CITRA_EXPORT void Citra_GetMemoryRegion(CitraContext* context, u32 region, const u8** ptr,
+                                        u32* size) {
+    const auto& memory_region = context->GetMemoryRegion(static_cast<Memory::Region>(region));
+    *ptr = std::get<const u8*>(memory_region);
+    *size = static_cast<u32>(std::get<std::size_t>(memory_region));
+}
+
+CITRA_EXPORT void Citra_GetTouchScreenLayout(CitraContext* context, u32* x, u32* y, u32* width,
+                                             u32* height, bool* rotated, bool* enabled) {
+    const auto& touch_screen_layout = context->GetTouchScreenLayout();
+    const auto& touch_screen_rect = std::get<Common::Rectangle<u32>>(touch_screen_layout);
+    *x = touch_screen_rect.left;
+    *y = touch_screen_rect.top;
+    *width = touch_screen_rect.GetWidth();
+    *height = touch_screen_rect.GetHeight();
+    *rotated = std::get<1>(touch_screen_layout);
+    *enabled = std::get<2>(touch_screen_layout);
 }
