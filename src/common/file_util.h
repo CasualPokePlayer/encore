@@ -178,6 +178,8 @@ void CopyDir(const std::string& source_path, const std::string& dest_path);
 // Set the current directory to given directory
 bool SetCurrentDir(const std::string& directory);
 
+void ResetUserPath();
+
 void SetUserPath(const std::string& path = "");
 
 void SetCurrentRomPath(const std::string& path);

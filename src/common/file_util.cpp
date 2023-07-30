@@ -760,6 +760,11 @@ std::unordered_map<UserPath, std::string> g_paths;
 std::unordered_map<UserPath, std::string> g_default_paths;
 } // namespace
 
+void ResetUserPath() {
+    g_paths.clear();
+    g_default_paths.clear();
+}
+
 void SetUserPath(const std::string& path) {
     std::string& user_path = g_paths[UserPath::UserDir];
 

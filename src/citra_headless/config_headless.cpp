@@ -16,6 +16,7 @@ using namespace Headless;
 
 Config_Headless::Config_Headless(Core::System& system_, ConfigCallbackInterface& callbacks_)
     : system(system_), callbacks(callbacks_) {
+    ASSERT(!system.IsPoweredOn());
     LoadConstantSettings();
     LoadSyncSettings();
     Reload();
@@ -182,6 +183,7 @@ void Config_Headless::LoadSyncSettings() {
     char user_directory_path_buffer[4096]{};
     callbacks.GetString("user_directory", user_directory_path_buffer,
                         sizeof(user_directory_path_buffer));
+    FileUtil::ResetUserPath();
     FileUtil::SetUserPath(user_directory_path_buffer);
 
     // System
@@ -191,8 +193,7 @@ void Config_Headless::LoadSyncSettings() {
     ReadSetting(Settings::values.init_time);
 
     // CFG
-    const auto cfg = system.IsPoweredOn() ? Service::CFG::GetModule(system)
-                                          : std::make_shared<Service::CFG::Module>();
+    const auto cfg = std::make_unique<Service::CFG::Module>();
 
     char username_buffer[11]{};
     callbacks.GetString("username", username_buffer, sizeof(username_buffer));
