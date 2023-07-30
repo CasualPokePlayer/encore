@@ -69,6 +69,9 @@ void EmuWindow_Headless_GL::ResetGLTexture() {
 }
 
 void EmuWindow_Headless_GL::Present() {
+    // get old state, so we can restore it afterwards
+    const auto& prev_state = OpenGL::OpenGLState::GetCurState();
+
     // check if video dimensions have changed
     // if they have, we need to recreate the texture
     const auto& layout = GetFramebufferLayout();
@@ -77,6 +80,9 @@ void EmuWindow_Headless_GL::Present() {
         height = layout.height;
         ResetGLTexture();
     }
+
+    // disable the scissor test while we're presenting
+    glDisable(GL_SCISSOR_TEST);
 
     // present to our FBO
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_texture_fbo.handle);
@@ -88,10 +94,15 @@ void EmuWindow_Headless_GL::Present() {
     glBindBuffer(GL_PIXEL_PACK_BUFFER, final_texture_pbo.handle);
     glBufferData(GL_PIXEL_PACK_BUFFER, width * height * sizeof(u32), nullptr, GL_STREAM_READ);
     glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, static_cast<void*>(0));
-
-    // unset buffers
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+    // restore the old state
+    if (prev_state.scissor.enabled) {
+        glEnable(GL_SCISSOR_TEST);
+    }
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, prev_state.draw.read_framebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prev_state.draw.draw_framebuffer);
 }
 
 u32 EmuWindow_Headless_GL::GetGLTexture() const {
