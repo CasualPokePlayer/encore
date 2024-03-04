@@ -1,6 +1,6 @@
 [submodule "boost"]
     path = externals/boost
-    url = https://github.com/citra-emu/ext-boost.git
+    url = https://github.com/CasualPokePlayer/encore-boost.git
 [submodule "nihstro"]
     path = externals/nihstro
     url = https://github.com/neobrain/nihstro.git
@@ -27,7 +27,7 @@
     url = https://github.com/benhoyt/inih.git
 [submodule "libressl"]
     path = externals/libressl
-    url = https://github.com/citra-emu/ext-libressl-portable.git
+    url = https://github.com/CasualPokePlayer/encore-libressl-portable.git
 [submodule "libusb"]
     path = externals/libusb/libusb
     url = https://github.com/libusb/libusb.git
@@ -84,7 +84,7 @@
     url = https://github.com/knik0/faad2
 [submodule "library-headers"]
     path = externals/library-headers
-    url = https://github.com/citra-emu/ext-library-headers.git
+    url = https://github.com/CasualPokePlayer/encore-library-headers.git
 [submodule "libadrenotools"]
     path = externals/libadrenotools
     url = https://github.com/bylaws/libadrenotools
