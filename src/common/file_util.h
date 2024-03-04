@@ -219,7 +219,6 @@ void SplitFilename83(const std::string& filename, std::array<char, 9>& short_nam
                      std::array<char, 4>& extension);
 
 // Splits the path on '/' or '\' and put the components into a vector
-// i.e. "C:\Users\Yuzu\Documents\save.bin" becomes {"C:", "Users", "Yuzu", "Documents", "save.bin" }
 [[nodiscard]] std::vector<std::string> SplitPathComponents(std::string_view filename);
 
 // Gets all of the text up to the last '/' or '\' in the path.
