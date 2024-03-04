@@ -139,24 +139,24 @@ void Savestate_MT::FinishSaveState(void* dest_buffer) {
 void Savestate_MT::LoadState(void* src_buffer, std::size_t buffer_len) {
     LoadBuf load_buf(state_buffer);
 
+    ZSTD_initDStream(dstream);
+    ZSTD_outBuffer out_buf = {
+        .dst = state_buffer.get(),
+        .size = MAX_UNCOMPRESSED_STATE_SIZE,
+        .pos = 0,
+    };
+
+    ZSTD_inBuffer in_buf = {
+        .src = src_buffer,
+        .size = std::min(ZSTD_DStreamInSize(), buffer_len),
+        .pos = 0,
+    };
+
+    ZSTD_decompressStream(dstream, &out_buf, &in_buf);
+    load_buf.buffer_filled.store(out_buf.pos, std::memory_order_relaxed);
+    in_buf.size = std::min(in_buf.size + FOUR_MiB, buffer_len);
+
     std::thread decompression_thread([&]() {
-        ZSTD_initDStream(dstream);
-        ZSTD_outBuffer out_buf = {
-            .dst = state_buffer.get(),
-            .size = MAX_UNCOMPRESSED_STATE_SIZE,
-            .pos = 0,
-        };
-
-        ZSTD_inBuffer in_buf = {
-            .src = src_buffer,
-            .size = std::min(static_cast<std::size_t>(ONE_MiB), buffer_len),
-            .pos = 0,
-        };
-
-        ZSTD_decompressStream(dstream, &out_buf, &in_buf);
-        load_buf.buffer_filled.store(out_buf.pos, std::memory_order_relaxed);
-        in_buf.size = std::min(in_buf.size + FOUR_MiB, buffer_len);
-
         while (in_buf.size != buffer_len) {
             ZSTD_decompressStream(dstream, &out_buf, &in_buf);
             load_buf.buffer_filled.store(out_buf.pos, std::memory_order_relaxed);

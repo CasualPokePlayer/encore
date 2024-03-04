@@ -428,3 +428,6 @@ if (ENABLE_VULKAN)
         add_subdirectory(libadrenotools)
     endif()
 endif()
+
+# blip_buf
+add_subdirectory(blip_buf)

@@ -9,8 +9,6 @@ add_library(citra-headless
     citra_context.h
     config_headless.cpp
     config_headless.h
-    blip_buf/blip_buf.cpp
-    blip_buf/blip_buf.h
     emu_window/emu_window_headless.cpp
     emu_window/emu_window_headless.h
     emu_window/emu_window_headless_gl.cpp
@@ -34,7 +32,7 @@ add_library(citra-headless
 create_target_directory_groups(citra-headless)
 
 target_link_libraries(citra-headless PRIVATE citra_common citra_core input_common network)
-target_link_libraries(citra-headless PRIVATE Boost::serialization glad libzstd_static)
+target_link_libraries(citra-headless PRIVATE blip_buf glad libzstd_static)
 target_link_libraries(citra-headless PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads)
 set_target_properties(citra-headless PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ENABLE_LTO})
 

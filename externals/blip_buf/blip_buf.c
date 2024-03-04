@@ -177,7 +177,7 @@ int blip_clocks_needed( const blip_t* m, int samples )
 	if ( needed < m->offset )
 		return 0;
 	
-	return (int)((needed - m->offset + m->factor - 1) / m->factor);
+	return (needed - m->offset + m->factor - 1) / m->factor;
 }
 
 void blip_end_frame( blip_t* m, unsigned t )
