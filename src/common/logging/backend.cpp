@@ -214,11 +214,9 @@ public:
 
 private:
     Impl(const std::string& file_backend_filename, const Filter& filter_)
-        : filter{filter_}, file_backend{file_backend_filename} {
-    }
+        : filter{filter_}, file_backend{file_backend_filename} {}
 
-    ~Impl() {
-    }
+    ~Impl() {}
 
     void StartBackendThread() {
         backend_thread = std::jthread([this](std::stop_token stop_token) {

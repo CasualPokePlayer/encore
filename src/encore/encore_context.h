@@ -14,7 +14,7 @@ namespace Headless {
 class EncoreContext {
 public:
     EncoreContext(ConfigCallbackInterface& config_interface, GLCallbackInterface& gl_interface,
-                 InputCallbackInterface& input_interface);
+                  InputCallbackInterface& input_interface);
     ~EncoreContext();
 
     std::pair<bool, std::string> InstallCIA(const std::string& cia_path);

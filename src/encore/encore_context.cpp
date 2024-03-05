@@ -28,8 +28,8 @@
 using namespace Headless;
 
 EncoreContext::EncoreContext(ConfigCallbackInterface& config_interface,
-                           GLCallbackInterface& gl_interface,
-                           InputCallbackInterface& input_interface)
+                             GLCallbackInterface& gl_interface,
+                             InputCallbackInterface& input_interface)
     : system(Core::System::GetInstance()) {
     config = std::make_unique<Config_Headless>(system, config_interface);
     Frontend::RegisterDefaultApplets(system);

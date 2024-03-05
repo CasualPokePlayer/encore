@@ -202,8 +202,8 @@ public:
     explicit Setting(const Type& default_val, const Type& min_val, const Type& max_val,
                      const std::string& name)
         requires(ranged)
-        : value{default_val},
-          default_value{default_val}, maximum{max_val}, minimum{min_val}, label{name} {}
+        : value{default_val}, default_value{default_val}, maximum{max_val}, minimum{min_val},
+          label{name} {}
 
     /**
      *  Returns a reference to the setting's value.

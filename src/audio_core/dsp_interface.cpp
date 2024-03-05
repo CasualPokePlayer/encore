@@ -111,6 +111,8 @@ void DspInterface::OutputCallback(s16* buffer, std::size_t num_frames) {
     }
 }
 
-Common::RingBuffer<s16, 0x2000, 2>& DspInterface::GetFifo() { return fifo; }
+Common::RingBuffer<s16, 0x2000, 2>& DspInterface::GetFifo() {
+    return fifo;
+}
 
 } // namespace AudioCore

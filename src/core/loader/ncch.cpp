@@ -117,7 +117,8 @@ ResultStatus AppLoader_NCCH::LoadExec(std::shared_ptr<Kernel::Process>& process)
         codeset->CodeSegment().offset = 0;
         codeset->CodeSegment().addr = overlay_ncch->exheader_header.codeset_info.text.address;
         codeset->CodeSegment().size =
-            overlay_ncch->exheader_header.codeset_info.text.num_max_pages * Memory::ENCORE_PAGE_SIZE;
+            overlay_ncch->exheader_header.codeset_info.text.num_max_pages *
+            Memory::ENCORE_PAGE_SIZE;
 
         codeset->RODataSegment().offset =
             codeset->CodeSegment().offset + codeset->CodeSegment().size;

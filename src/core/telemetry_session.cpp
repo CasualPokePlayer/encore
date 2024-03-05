@@ -32,11 +32,9 @@ bool VerifyLogin(const std::string& username, const std::string& token) {
 
 TelemetrySession::TelemetrySession() = default;
 
-TelemetrySession::~TelemetrySession() {
-}
+TelemetrySession::~TelemetrySession() {}
 
-void TelemetrySession::AddInitialInfo(Loader::AppLoader& app_loader) {
-}
+void TelemetrySession::AddInitialInfo(Loader::AppLoader& app_loader) {}
 
 bool TelemetrySession::SubmitTestcase() {
     return false;

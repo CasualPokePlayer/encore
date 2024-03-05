@@ -75,8 +75,7 @@ Common::ParamPackage GetControllerAnalogBinds(const Common::ParamPackage& params
     return {};
 }
 
-void ReloadInputDevices() {
-}
+void ReloadInputDevices() {}
 
 namespace Polling {
 

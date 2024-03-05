@@ -58,10 +58,9 @@ std::list<WifiPacket> NWM_UDS::GetReceivedBeacons(const MacAddress& sender) {
     std::scoped_lock lock(beacon_mutex);
     if (sender != BroadcastMac) {
         std::list<WifiPacket> filtered_list;
-        const auto beacon = std::find_if(received_beacons.begin(), received_beacons.end(),
-                                         [&sender](const WifiPacket& packet) {
-                                             return packet.transmitter_address == sender;
-                                         });
+        const auto beacon = std::find_if(
+            received_beacons.begin(), received_beacons.end(),
+            [&sender](const WifiPacket& packet) { return packet.transmitter_address == sender; });
         if (beacon != received_beacons.end()) {
             filtered_list.push_back(*beacon);
             // TODO(B3N30): Check if the complete deque is cleared or just the fetched entries
@@ -73,8 +72,7 @@ std::list<WifiPacket> NWM_UDS::GetReceivedBeacons(const MacAddress& sender) {
 }
 
 /// Sends a WifiPacket to the room we're currently connected to.
-void SendPacket(WifiPacket& packet) {
-}
+void SendPacket(WifiPacket& packet) {}
 
 u16 NWM_UDS::GetNextAvailableNodeId() {
     for (u16 index = 0; index < connection_status.max_nodes; ++index) {
@@ -137,11 +135,10 @@ void NWM_UDS::HandleNodeMapPacket(const WifiPacket& packet) {
 
 void NWM_UDS::HandleBeaconFrame(const WifiPacket& packet) {
     std::scoped_lock lock(beacon_mutex);
-    const auto unique_beacon =
-        std::find_if(received_beacons.begin(), received_beacons.end(),
-                     [&packet](const WifiPacket& new_packet) {
-                         return new_packet.transmitter_address == packet.transmitter_address;
-                     });
+    const auto unique_beacon = std::find_if(
+        received_beacons.begin(), received_beacons.end(), [&packet](const WifiPacket& new_packet) {
+            return new_packet.transmitter_address == packet.transmitter_address;
+        });
     if (unique_beacon != received_beacons.end()) {
         // We already have a beacon from the same mac in the deque, remove the old one;
         received_beacons.erase(unique_beacon);

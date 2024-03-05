@@ -9,5 +9,5 @@
 #define ENCORE_ARCH(NAME) (ENCORE_ARCH_##NAME)
 
 #define ENCORE_ARCH_x86_64 BOOST_ARCH_X86_64
-#define ENCORE_ARCH_arm64                                                                           \
+#define ENCORE_ARCH_arm64                                                                          \
     (BOOST_ARCH_ARM >= BOOST_VERSION_NUMBER(8, 0, 0) && BOOST_ARCH_WORD_BITS == 64)

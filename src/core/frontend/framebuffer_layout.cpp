@@ -408,8 +408,7 @@ FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale, bool is_secondar
     int width, height;
     switch (Settings::values.layout_option.GetValue()) {
     case Settings::LayoutOption::SingleScreen:
-    case Settings::LayoutOption::SeparateWindows:
-    {
+    case Settings::LayoutOption::SeparateWindows: {
         const bool swap_screens = is_secondary || Settings::values.swap_screen.GetValue();
         if (swap_screens) {
             width = Core::kScreenBottomWidth * res_scale;
