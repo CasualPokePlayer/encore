@@ -52,9 +52,6 @@ public:
     /// Queues the provided frame for presentation.
     void Present(Frame* frame);
 
-    /// This is called to notify the rendering backend of a surface change
-    void NotifySurfaceChanged();
-
     [[nodiscard]] vk::RenderPass Renderpass() const noexcept {
         return present_renderpass;
     }

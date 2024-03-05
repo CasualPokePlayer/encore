@@ -1042,12 +1042,7 @@ void SOC_U::SockAtMark(Kernel::HLERequestContext& ctx) {
     func_res = ::ioctlsocket(holder.socket_fd, SIOCATMARK, &atMark);
     is_at_mark = atMark != 0;
 #else
-#ifdef ANDROID
-    func_res = 0;
-    LOG_WARNING(Service_SOC, "(STUBBED) called");
-#else
     func_res = ::sockatmark(holder.socket_fd);
-#endif
     is_at_mark = func_res > 0;
 #endif // _WIN32
 

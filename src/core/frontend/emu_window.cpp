@@ -58,13 +58,11 @@ EmuWindow::~EmuWindow() = default;
 
 bool EmuWindow::IsWithinTouchscreen(const Layout::FramebufferLayout& layout, unsigned framebuffer_x,
                                     unsigned framebuffer_y) {
-#ifndef ANDROID
     // If separate windows and the touch is in the primary (top) screen, ignore it.
     if (Settings::values.layout_option.GetValue() == Settings::LayoutOption::SeparateWindows &&
         !is_secondary && !Settings::values.swap_screen.GetValue()) {
         return false;
     }
-#endif
 
     if (Settings::values.render_3d.GetValue() == Settings::StereoRenderOption::SideBySide) {
         return (framebuffer_y >= layout.bottom_screen.top &&
@@ -213,12 +211,10 @@ void EmuWindow::UpdateCurrentFramebufferLayout(u32 width, u32 height, bool is_po
                                          Settings::values.upright_screen.GetValue(), 1.0f,
                                          Layout::VerticalAlignment::Bottom);
             break;
-#ifndef ANDROID
         case Settings::LayoutOption::SeparateWindows:
             layout = Layout::SeparateWindowsLayout(width, height, is_secondary,
                                                    Settings::values.upright_screen.GetValue());
             break;
-#endif
         case Settings::LayoutOption::MobilePortrait:
             layout = Layout::MobilePortraitFrameLayout(width, height,
                                                        Settings::values.swap_screen.GetValue());

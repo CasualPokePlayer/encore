@@ -7,9 +7,6 @@
 [submodule "soundtouch"]
     path = externals/soundtouch
     url = https://codeberg.org/soundtouch/soundtouch.git
-[submodule "catch2"]
-    path = externals/catch2
-    url = https://github.com/catchorg/Catch2
 [submodule "dynarmic"]
     path = externals/dynarmic
     url = https://github.com/CasualPokePlayer/encore-dynarmic.git
@@ -19,27 +16,9 @@
 [submodule "fmt"]
     path = externals/fmt
     url = https://github.com/fmtlib/fmt.git
-[submodule "enet"]
-    path = externals/enet
-    url = https://github.com/lsalzman/enet.git
-[submodule "inih"]
-    path = externals/inih/inih
-    url = https://github.com/benhoyt/inih.git
 [submodule "libressl"]
     path = externals/libressl
     url = https://github.com/CasualPokePlayer/encore-libressl-portable.git
-[submodule "libusb"]
-    path = externals/libusb/libusb
-    url = https://github.com/libusb/libusb.git
-[submodule "cubeb"]
-    path = externals/cubeb
-    url = https://github.com/mozilla/cubeb
-[submodule "discord-rpc"]
-    path = externals/discord-rpc
-    url = https://github.com/yuzu-emu/discord-rpc.git
-[submodule "cpp-jwt"]
-    path = externals/cpp-jwt
-    url = https://github.com/arun11299/cpp-jwt.git
 [submodule "teakra"]
     path = externals/teakra
     url = https://github.com/wwylele/teakra.git
@@ -49,12 +28,6 @@
 [submodule "zstd"]
     path = externals/zstd
     url = https://github.com/facebook/zstd.git
-[submodule "libyuv"]
-    path = externals/libyuv
-    url = https://github.com/lemenkov/libyuv.git
-[submodule "sdl2"]
-	path = externals/sdl2/SDL
-	url = https://github.com/libsdl-org/SDL
 [submodule "cryptopp-cmake"]
 	path = externals/cryptopp-cmake
 	url = https://github.com/abdes/cryptopp-cmake.git
@@ -64,9 +37,6 @@
 [submodule "dds-ktx"]
     path = externals/dds-ktx
     url = https://github.com/septag/dds-ktx
-[submodule "openal-soft"]
-    path = externals/openal-soft
-    url = https://github.com/kcat/openal-soft
 [submodule "glslang"]
     path = externals/glslang
     url = https://github.com/KhronosGroup/glslang
@@ -78,16 +48,10 @@
     url = https://github.com/KhronosGroup/Vulkan-Headers
 [submodule "sirit"]
     path = externals/sirit
-    url = https://github.com/yuzu-emu/sirit
+    url = https://github.com/CasualPokePlayer/encore-sirit
 [submodule "faad2"]
     path = externals/faad2/faad2
     url = https://github.com/knik0/faad2
-[submodule "library-headers"]
-    path = externals/library-headers
-    url = https://github.com/CasualPokePlayer/encore-library-headers.git
-[submodule "libadrenotools"]
-    path = externals/libadrenotools
-    url = https://github.com/bylaws/libadrenotools
 [submodule "oaknut"]
 	path = externals/oaknut
 	url = https://github.com/merryhime/oaknut.git

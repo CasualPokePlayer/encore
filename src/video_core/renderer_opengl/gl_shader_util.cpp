@@ -18,10 +18,6 @@ GLuint LoadShader(std::string_view source, GLenum type) {
     if (GLES) {
         preamble = R"(#version 320 es
 
-#if defined(GL_ANDROID_extension_pack_es31a)
-#extension GL_ANDROID_extension_pack_es31a : enable
-#endif // defined(GL_ANDROID_extension_pack_es31a)
-
 #if defined(GL_EXT_clip_cull_distance)
 #extension GL_EXT_clip_cull_distance : enable
 #endif // defined(GL_EXT_clip_cull_distance)

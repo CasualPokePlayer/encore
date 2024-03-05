@@ -2,7 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#define CITRA_IGNORE_EXIT(x)
+#define ENCORE_IGNORE_EXIT(x)
 
 #include <algorithm>
 #include <cstdio>
@@ -232,7 +232,7 @@ static unsigned int DPO(RotateRightByRegister)(ARMul_State* cpu, unsigned int sh
 
 #define DEBUG_MSG                                                                                  \
     LOG_DEBUG(Core_ARM11, "inst is {:x}", inst);                                                   \
-    CITRA_IGNORE_EXIT(0)
+    ENCORE_IGNORE_EXIT(0)
 
 #define LnSWoUB(s) glue(LnSWoUB, s)
 #define MLnS(s) glue(MLnS, s)
@@ -748,7 +748,7 @@ get_addr_fp_t GetAddressingOpLoadStoreT(unsigned int inst) {
     // of this instruction, however the 3DS CPU doesn't
     // support this variant (the 3DS CPU is only ARMv6K,
     // while this variant is added in ARMv6T2).
-    // So it's sufficient for citra to not implement this.
+    // So it's sufficient for encore to not implement this.
     return nullptr;
 }
 
@@ -832,7 +832,7 @@ static unsigned int InterpreterTranslateInstruction(const ARMul_State* cpu, cons
                   inst);
         LOG_ERROR(Core_ARM11, "cpsr={:#X}, cpu->TFlag={}, r15={:#010X}", cpu->Cpsr, cpu->TFlag,
                   cpu->Reg[15]);
-        CITRA_IGNORE_EXIT(-1);
+        ENCORE_IGNORE_EXIT(-1);
     }
     inst_base = arm_instruction_trans[idx](inst, idx);
 
@@ -948,9 +948,6 @@ unsigned InterpreterMainLoop(ARMul_State* cpu) {
 #define INC_PC(l) ptr += sizeof(arm_inst) + l
 #define INC_PC_STUB ptr += sizeof(arm_inst)
 
-#ifdef ANDROID
-#define GDB_BP_CHECK
-#else
 #define GDB_BP_CHECK                                                                               \
     cpu->Cpsr &= ~(1 << 5);                                                                        \
     cpu->Cpsr |= cpu->TFlag << 5;                                                                  \
@@ -963,7 +960,6 @@ unsigned InterpreterMainLoop(ARMul_State* cpu) {
             goto END;                                                                              \
         }                                                                                          \
     }
-#endif
 
 // GCC and Clang have a C++ extension to support a lookup table of labels. Otherwise, fallback to a
 // clunky switch statement.
@@ -1651,13 +1647,11 @@ DISPATCH : {
             goto END;
     }
 
-#ifndef ANDROID
     // Find breakpoint if one exists within the block
     if (GDBStub::IsConnected()) {
         breakpoint_data =
             GDBStub::GetNextBreakpointFromAddress(cpu->Reg[15], GDBStub::BreakpointType::Execute);
     }
-#endif
 
     inst_base = (arm_inst*)&trans_cache_buf[ptr];
     GOTO_NEXT_INST;
@@ -1850,7 +1844,7 @@ BXJ_INST : {
     // According to the ARM documentation on BXJ, if setting the J bit in the APSR
     // fails, then BXJ functions identically like a regular BX instruction.
     //
-    // This is sufficient for citra, as the CPU for the 3DS does not implement Jazelle.
+    // This is sufficient for encore, as the CPU for the 3DS does not implement Jazelle.
 
     if (inst_base->cond == ConditionCode::AL || CondPassed(cpu, inst_base->cond)) {
         bx_inst* const inst_cream = (bx_inst*)inst_base->component;

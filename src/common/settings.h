@@ -38,9 +38,7 @@ enum class LayoutOption : u32 {
     SingleScreen,
     LargeScreen,
     SideScreen,
-#ifndef ANDROID
     SeparateWindows,
-#endif
     HybridScreen,
     // Similiar to default, but better for mobile devices in portrait mode. Top screen in clamped to
     // the top of the frame, and the bottom screen is enlarged to match the top screen.
@@ -415,7 +413,7 @@ struct TouchFromButtonMap {
     std::vector<std::string> buttons;
 };
 
-/// A special region value indicating that citra will automatically select a region
+/// A special region value indicating that encore will automatically select a region
 /// value to fit the region lockout info of the game
 static constexpr s32 REGION_VALUE_AUTO_SELECT = -1;
 
@@ -425,8 +423,6 @@ struct Values {
     int current_input_profile_index;          ///< The current input profile index
     std::vector<InputProfile> input_profiles; ///< The list of input profiles
     std::vector<TouchFromButtonMap> touch_from_button_maps;
-
-    SwitchableSetting<bool> enable_gamemode{true, "enable_gamemode"};
 
     // Core
     Setting<bool> use_cpu_jit{true, "use_cpu_jit"};

@@ -1,4 +1,4 @@
-add_library(citra_core STATIC
+add_library(encore_core STATIC
     3ds.h
     arm/arm_interface.h
     arm/dyncom/arm_dyncom.cpp
@@ -38,8 +38,6 @@ add_library(citra_core STATIC
     core_timing.h
     dumping/backend.cpp
     dumping/backend.h
-    dumping/ffmpeg_backend.cpp
-    dumping/ffmpeg_backend.h
     file_sys/archive_backend.cpp
     file_sys/archive_backend.h
     file_sys/archive_extsavedata.cpp
@@ -474,32 +472,14 @@ add_library(citra_core STATIC
     tracer/recorder.h
 )
 
-create_target_directory_groups(citra_core)
+create_target_directory_groups(encore_core)
 
-target_link_libraries(citra_core PUBLIC citra_common PRIVATE audio_core network video_core)
-target_link_libraries(citra_core PRIVATE Boost::boost Boost::serialization Boost::iostreams httplib)
-target_link_libraries(citra_core PUBLIC dds-ktx PRIVATE cryptopp fmt lodepng open_source_archives)
-
-if (ENABLE_WEB_SERVICE)
-    target_link_libraries(citra_core PRIVATE web_service)
-endif()
-
-if (ENABLE_SCRIPTING)
-    target_compile_definitions(citra_core PUBLIC -DENABLE_SCRIPTING)
-    target_sources(citra_core PRIVATE
-        rpc/packet.cpp
-        rpc/packet.h
-        rpc/rpc_server.cpp
-        rpc/rpc_server.h
-        rpc/server.cpp
-        rpc/server.h
-        rpc/udp_server.cpp
-        rpc/udp_server.h
-    )
-endif()
+target_link_libraries(encore_core PUBLIC encore_common PRIVATE audio_core video_core)
+target_link_libraries(encore_core PRIVATE Boost::boost Boost::serialization Boost::iostreams httplib)
+target_link_libraries(encore_core PUBLIC dds-ktx PRIVATE cryptopp fmt lodepng open_source_archives)
 
 if ("x86_64" IN_LIST ARCHITECTURE OR "arm64" IN_LIST ARCHITECTURE)
-    target_sources(citra_core PRIVATE
+    target_sources(encore_core PRIVATE
         arm/dynarmic/arm_dynarmic.cpp
         arm/dynarmic/arm_dynarmic.h
         arm/dynarmic/arm_dynarmic_cp15.cpp
@@ -509,9 +489,9 @@ if ("x86_64" IN_LIST ARCHITECTURE OR "arm64" IN_LIST ARCHITECTURE)
         arm/dynarmic/arm_tick_counts.cpp
         arm/dynarmic/arm_tick_counts.h
     )
-    target_link_libraries(citra_core PRIVATE dynarmic)
+    target_link_libraries(encore_core PRIVATE dynarmic)
 endif()
 
-if (CITRA_USE_PRECOMPILED_HEADERS)
-    target_precompile_headers(citra_core PRIVATE precompiled_headers.h)
+if (ENCORE_USE_PRECOMPILED_HEADERS)
+    target_precompile_headers(encore_core PRIVATE precompiled_headers.h)
 endif()

@@ -837,7 +837,6 @@ void RendererVulkan::SwapBuffers() {
     PrepareRendertarget();
     RenderScreenshot();
     RenderToWindow(main_window, layout, false);
-#ifndef ANDROID
     if (Settings::values.layout_option.GetValue() == Settings::LayoutOption::SeparateWindows) {
         ASSERT(secondary_window);
         const auto& secondary_layout = secondary_window->GetFramebufferLayout();
@@ -847,7 +846,7 @@ void RendererVulkan::SwapBuffers() {
         RenderToWindow(*second_window, secondary_layout, false);
         secondary_window->PollEvents();
     }
-#endif
+
     rasterizer.TickFrame();
     EndFrame();
 }

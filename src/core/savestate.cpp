@@ -16,7 +16,6 @@
 #include "core/movie.h"
 #include "core/savestate.h"
 #include "core/savestate_data.h"
-#include "network/network.h"
 
 namespace Core {
 
@@ -164,10 +163,6 @@ void System::SaveState(u32 slot) const {
 }
 
 void System::LoadState(u32 slot) {
-    if (Network::GetRoomMember().lock()->IsConnected()) {
-        throw std::runtime_error("Unable to load while connected to multiplayer");
-    }
-
     const u64 movie_id = movie.GetCurrentMovieID();
     const auto path = GetSaveStatePath(title_id, movie_id, slot);
 

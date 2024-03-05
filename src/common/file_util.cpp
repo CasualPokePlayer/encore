@@ -74,11 +74,6 @@
 
 #endif
 
-#ifdef ANDROID
-#include "common/android_storage.h"
-#include "common/string_util.h"
-#endif
-
 #include <algorithm>
 #include <sys/stat.h>
 
@@ -118,8 +113,6 @@ bool Exists(const std::string& filename) {
         copy += DIR_SEP_CHR;
 
     int result = _wstat64(Common::UTF8ToUTF16W(copy).c_str(), &file_info);
-#elif ANDROID
-    int result = AndroidStorage::FileExists(filename) ? 0 : -1;
 #else
     struct stat file_info;
     int result = stat(copy.c_str(), &file_info);
@@ -129,10 +122,6 @@ bool Exists(const std::string& filename) {
 }
 
 bool IsDirectory(const std::string& filename) {
-#ifdef ANDROID
-    return AndroidStorage::IsDirectory(filename);
-#endif
-
     struct stat file_info;
 
     std::string copy(filename);
@@ -177,11 +166,6 @@ bool Delete(const std::string& filename) {
         LOG_ERROR(Common_Filesystem, "DeleteFile failed on {}: {}", filename, GetLastErrorMsg());
         return false;
     }
-#elif ANDROID
-    if (!AndroidStorage::DeleteDocument(filename)) {
-        LOG_ERROR(Common_Filesystem, "unlink failed on {}", filename);
-        return false;
-    }
 #else
     if (unlink(filename.c_str()) == -1) {
         LOG_ERROR(Common_Filesystem, "unlink failed on {}: {}", filename, GetLastErrorMsg());
@@ -204,24 +188,6 @@ bool CreateDir(const std::string& path) {
     }
     LOG_ERROR(Common_Filesystem, "CreateDirectory failed on {}: {}", path, error);
     return false;
-#elif ANDROID
-    std::string directory = path;
-    std::string filename = path;
-    if (Common::EndsWith(path, "/")) {
-        directory = GetParentPath(path);
-        filename = GetParentPath(path);
-    }
-    directory = GetParentPath(directory);
-    filename = GetFilename(filename);
-    // If directory path is empty, set it to root.
-    if (directory.empty()) {
-        directory = "/";
-    }
-    if (!AndroidStorage::CreateDir(directory, filename)) {
-        LOG_ERROR(Common_Filesystem, "mkdir failed on {}", path);
-        return false;
-    };
-    return true;
 #else
     if (mkdir(path.c_str(), 0755) == 0)
         return true;
@@ -285,9 +251,6 @@ bool DeleteDir(const std::string& filename) {
 #ifdef _WIN32
     if (::RemoveDirectoryW(Common::UTF8ToUTF16W(filename).c_str()))
         return true;
-#elif ANDROID
-    if (AndroidStorage::DeleteDocument(filename))
-        return true;
 #else
     if (rmdir(filename.c_str()) == 0)
         return true;
@@ -302,9 +265,6 @@ bool Rename(const std::string& srcFilename, const std::string& destFilename) {
 #ifdef _WIN32
     if (_wrename(Common::UTF8ToUTF16W(srcFilename).c_str(),
                  Common::UTF8ToUTF16W(destFilename).c_str()) == 0)
-        return true;
-#elif ANDROID
-    if (AndroidStorage::RenameFile(srcFilename, std::string(GetFilename(destFilename))))
         return true;
 #else
     if (rename(srcFilename.c_str(), destFilename.c_str()) == 0)
@@ -325,9 +285,6 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
     LOG_ERROR(Common_Filesystem, "failed {} --> {}: {}", srcFilename, destFilename,
               GetLastErrorMsg());
     return false;
-#elif ANDROID
-    return AndroidStorage::CopyFile(srcFilename, std::string(GetParentPath(destFilename)),
-                                    std::string(GetFilename(destFilename)));
 #else
 
     // Open input file
@@ -388,10 +345,6 @@ u64 GetSize(const std::string& filename) {
     struct stat buf;
 #ifdef _WIN32
     if (_wstat64(Common::UTF8ToUTF16W(filename).c_str(), &buf) == 0)
-#elif ANDROID
-    u64 result = AndroidStorage::GetSize(filename);
-    LOG_TRACE(Common_Filesystem, "{}: {}", filename, result);
-    return result;
 #else
     if (stat(filename.c_str(), &buf) == 0)
 #endif
@@ -461,10 +414,6 @@ bool ForeachDirectoryEntry(u64* num_entries_out, const std::string& directory,
     // windows loop
     do {
         const std::string virtual_name(Common::UTF16ToUTF8(ffd.cFileName));
-#elif ANDROID
-    // android loop
-    auto result = AndroidStorage::GetFilesName(directory);
-    for (auto virtual_name : result) {
 #else
     DIR* dirp = opendir(directory.c_str());
     if (!dirp)
@@ -488,8 +437,6 @@ bool ForeachDirectoryEntry(u64* num_entries_out, const std::string& directory,
 #ifdef _WIN32
     } while (FindNextFileW(handle_find, &ffd) != 0);
     FindClose(handle_find);
-#elif ANDROID
-    }
 #else
     }
     closedir(dirp);
@@ -580,17 +527,12 @@ void CopyDir([[maybe_unused]] const std::string& source_path,
     if (!FileUtil::Exists(dest_path))
         FileUtil::CreateFullPath(dest_path);
 
-#ifdef ANDROID
-    auto result = AndroidStorage::GetFilesName(source_path);
-    for (auto virtualName : result) {
-#else
     DIR* dirp = opendir(source_path.c_str());
     if (!dirp)
         return;
 
     while (struct dirent* result = readdir(dirp)) {
         const std::string virtualName(result->d_name);
-#endif // ANDROID
 
         // check for "." and ".."
         if (((virtualName[0] == '.') && (virtualName[1] == '\0')) ||
@@ -610,9 +552,7 @@ void CopyDir([[maybe_unused]] const std::string& source_path,
             FileUtil::Copy(source, dest);
     }
 
-#ifndef ANDROID
     closedir(dirp);
-#endif // ANDROID
 #endif // _WIN32
 }
 
@@ -784,10 +724,6 @@ void SetUserPath(const std::string& path) {
 
         g_paths.emplace(UserPath::ConfigDir, user_path + CONFIG_DIR DIR_SEP);
         g_paths.emplace(UserPath::CacheDir, user_path + CACHE_DIR DIR_SEP);
-#elif ANDROID
-        user_path = "/";
-        g_paths.emplace(UserPath::ConfigDir, user_path + CONFIG_DIR DIR_SEP);
-        g_paths.emplace(UserPath::CacheDir, user_path + CACHE_DIR DIR_SEP);
 #else
         auto current_dir = FileUtil::GetCurrentDir();
         if (current_dir.has_value() &&
@@ -856,8 +792,8 @@ bool StringReplace(std::string& haystack, const std::string& a, const std::strin
 
 std::string SerializePath(const std::string& input, bool is_saving) {
     auto result = input;
-    StringReplace(result, "%CITRA_ROM_FILE%", g_currentRomPath, is_saving);
-    StringReplace(result, "%CITRA_USER_DIR%", GetUserPath(UserPath::UserDir), is_saving);
+    StringReplace(result, "%ENCORE_ROM_FILE%", g_currentRomPath, is_saving);
+    StringReplace(result, "%ENCORE_USER_DIR%", GetUserPath(UserPath::UserDir), is_saving);
     return result;
 }
 
@@ -1016,9 +952,6 @@ std::string_view RemoveTrailingSlash(std::string_view path) {
 
 std::string SanitizePath(std::string_view path_, DirectorySeparator directory_separator) {
     std::string path(path_);
-#ifdef ANDROID
-    return std::string(RemoveTrailingSlash(path));
-#endif
     char type1 = directory_separator == DirectorySeparator::BackwardSlash ? '/' : '\\';
     char type2 = directory_separator == DirectorySeparator::BackwardSlash ? '\\' : '/';
 
@@ -1083,36 +1016,6 @@ bool IOFile::Open() {
                       Common::UTF8ToUTF16W(openmode).c_str(), flags);
     m_good = m_file != nullptr;
 
-#elif ANDROID
-    // Check whether filepath is startsWith content
-    AndroidStorage::AndroidOpenMode android_open_mode = AndroidStorage::ParseOpenmode(openmode);
-    if (android_open_mode == AndroidStorage::AndroidOpenMode::WRITE ||
-        android_open_mode == AndroidStorage::AndroidOpenMode::READ_WRITE ||
-        android_open_mode == AndroidStorage::AndroidOpenMode::WRITE_APPEND ||
-        android_open_mode == AndroidStorage::AndroidOpenMode::WRITE_TRUNCATE ||
-        android_open_mode == AndroidStorage::AndroidOpenMode::READ_WRITE_TRUNCATE ||
-        android_open_mode == AndroidStorage::AndroidOpenMode::READ_WRITE_APPEND) {
-        if (!FileUtil::Exists(filename)) {
-            std::string directory(GetParentPath(filename));
-            std::string display_name(GetFilename(filename));
-            if (!AndroidStorage::CreateFile(directory, display_name)) {
-                m_good = m_file != nullptr;
-                return m_good;
-            }
-        }
-    }
-    m_fd = AndroidStorage::OpenContentUri(filename, android_open_mode);
-    if (m_fd != -1) {
-        int error_num = 0;
-        m_file = fdopen(m_fd, openmode.c_str());
-        error_num = errno;
-        if (error_num != 0 && m_file == nullptr) {
-            LOG_ERROR(Common_Filesystem, "Error on file: {}, error: {}", filename,
-                      strerror(error_num));
-        }
-    }
-
-    m_good = m_file != nullptr;
 #else
     m_file = std::fopen(filename.c_str(), openmode.c_str());
     m_good = m_file != nullptr;

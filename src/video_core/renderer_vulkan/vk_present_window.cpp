@@ -336,29 +336,13 @@ void PresentWindow::PresentThread(std::stop_token token) {
     }
 }
 
-void PresentWindow::NotifySurfaceChanged() {
-#ifdef ANDROID
-    std::scoped_lock lock{recreate_surface_mutex};
-    next_surface = CreateSurface(instance.GetInstance(), emu_window);
-    recreate_surface_cv.notify_one();
-#endif
-}
-
 void PresentWindow::CopyToSwapchain(Frame* frame) {
     const auto recreate_swapchain = [&] {
-#ifdef ANDROID
-        {
-            std::unique_lock lock{recreate_surface_mutex};
-            recreate_surface_cv.wait(lock, [this]() { return surface != next_surface; });
-            surface = next_surface;
-        }
-#endif
         std::scoped_lock submit_lock{scheduler.submit_mutex};
         graphics_queue.waitIdle();
         swapchain.Create(frame->width, frame->height, surface);
     };
 
-#ifndef ANDROID
     const bool use_vsync = Settings::values.use_vsync_new.GetValue();
     const bool size_changed =
         swapchain.GetWidth() != frame->width || swapchain.GetHeight() != frame->height;
@@ -367,7 +351,6 @@ void PresentWindow::CopyToSwapchain(Frame* frame) {
         vsync_enabled = use_vsync;
         recreate_swapchain();
     }
-#endif
 
     while (!swapchain.AcquireNextImage()) {
         recreate_swapchain();

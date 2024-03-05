@@ -5,7 +5,7 @@
 #pragma once
 
 #include "common/arch.h"
-#if CITRA_ARCH(arm64)
+#if ENCORE_ARCH(arm64)
 
 #include <array>
 #include <bitset>

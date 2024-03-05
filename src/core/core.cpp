@@ -16,7 +16,7 @@
 #include "core/hle/service/cam/cam.h"
 #include "core/hle/service/hid/hid.h"
 #include "core/hle/service/ir/ir_user.h"
-#if CITRA_ARCH(x86_64) || CITRA_ARCH(arm64)
+#if ENCORE_ARCH(x86_64) || ENCORE_ARCH(arm64)
 #include "core/arm/dynarmic/arm_dynarmic.h"
 #endif
 #include "core/arm/dyncom/arm_dyncom.h"
@@ -44,11 +44,7 @@
 #include "core/hw/aes/key.h"
 #include "core/loader/loader.h"
 #include "core/movie.h"
-#ifdef ENABLE_SCRIPTING
-#include "core/rpc/server.h"
-#endif
 #include "core/telemetry_session.h"
-#include "network/network.h"
 #include "video_core/custom_textures/custom_tex_manager.h"
 #include "video_core/gpu.h"
 #include "video_core/renderer_base.h"
@@ -403,7 +399,7 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
     exclusive_monitor = MakeExclusiveMonitor(*memory, num_cores);
     cpu_cores.reserve(num_cores);
     if (Settings::values.use_cpu_jit) {
-#if CITRA_ARCH(x86_64) || CITRA_ARCH(arm64)
+#if ENCORE_ARCH(x86_64) || ENCORE_ARCH(arm64)
         for (u32 i = 0; i < num_cores; ++i) {
             cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(
                 *this, *memory, i, timing->GetTimer(i), *exclusive_monitor));
@@ -441,10 +437,6 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
     dsp_core->EnableStretching(Settings::values.enable_audio_stretching.GetValue());
 
     telemetry_session = std::make_unique<Core::TelemetrySession>();
-
-#ifdef ENABLE_SCRIPTING
-    rpc_server = std::make_unique<RPC::Server>(*this);
-#endif
 
     service_manager = std::make_unique<Service::SM::ServiceManager>(*this);
     archive_manager = std::make_unique<Service::FS::ArchiveManager>(*this);
@@ -588,9 +580,6 @@ void System::Shutdown(bool is_deserializing) {
     }
     custom_tex_manager.reset();
     telemetry_session.reset();
-#ifdef ENABLE_SCRIPTING
-    rpc_server.reset();
-#endif
     archive_manager.reset();
     service_manager.reset();
     dsp_core.reset();
@@ -601,11 +590,6 @@ void System::Shutdown(bool is_deserializing) {
 
     if (video_dumper && video_dumper->IsDumping()) {
         video_dumper->StopDumping();
-    }
-
-    if (auto room_member = Network::GetRoomMember().lock()) {
-        Network::GameInfo game_info{};
-        room_member->SendGameInfo(game_info);
     }
 
     memory.reset();
@@ -648,9 +632,7 @@ void System::ApplySettings() {
     GDBStub::ToggleServer(Settings::values.use_gdbstub.GetValue());
 
     if (gpu) {
-#ifndef ANDROID
         gpu->Renderer().UpdateCurrentFramebufferLayout();
-#endif
         auto& settings = gpu->Renderer().Settings();
         settings.bg_color_update_requested = true;
         settings.shader_update_requested = true;

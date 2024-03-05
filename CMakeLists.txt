@@ -15,7 +15,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/externals/cmake-modul
 include(DownloadExternals)
 include(CMakeDependentOption)
 
-project(citra LANGUAGES C CXX ASM)
+project(encore LANGUAGES C CXX ASM)
 
 # Some submodules like to pick their own default build type if not specified.
 # Make sure we default to Release build type always, unless the generator has custom types.
@@ -59,43 +59,19 @@ else()
     set(DEFAULT_ENABLE_LTO OFF)
 endif()
 
-option(ENABLE_SDL2 "Enable using SDL2" ON)
-CMAKE_DEPENDENT_OPTION(ENABLE_SDL2_FRONTEND "Enable the SDL2 frontend" ON "ENABLE_SDL2;NOT ANDROID AND NOT IOS" OFF)
-option(USE_SYSTEM_SDL2 "Use the system SDL2 lib (instead of the bundled one)" OFF)
-
-# Set bundled qt as dependent options.
-option(ENABLE_QT "Enable the Qt frontend" ON)
-option(ENABLE_QT_TRANSLATION "Enable translations for the Qt frontend" OFF)
-CMAKE_DEPENDENT_OPTION(ENABLE_QT_UPDATER "Enable built-in updater for the Qt frontend" ON "NOT IOS" OFF)
-
-CMAKE_DEPENDENT_OPTION(ENABLE_TESTS "Enable generating tests executable" ON "NOT IOS" OFF)
-CMAKE_DEPENDENT_OPTION(ENABLE_DEDICATED_ROOM "Enable generating dedicated room executable" ON "NOT ANDROID AND NOT IOS" OFF)
-
-option(ENABLE_WEB_SERVICE "Enable web services (telemetry, etc.)" ON)
-option(ENABLE_SCRIPTING "Enable RPC server for scripting" ON)
-
-option(ENABLE_HEADLESS "Enable the headless shared library" OFF)
-
-CMAKE_DEPENDENT_OPTION(ENABLE_CUBEB "Enables the cubeb audio backend" ON "NOT IOS" OFF)
-option(ENABLE_OPENAL "Enables the OpenAL audio backend" ON)
-
-CMAKE_DEPENDENT_OPTION(ENABLE_LIBUSB "Enable libusb for GameCube Adapter support" ON "NOT IOS" OFF)
-
 CMAKE_DEPENDENT_OPTION(ENABLE_SOFTWARE_RENDERER "Enables the software renderer" ON "NOT ANDROID" OFF)
 CMAKE_DEPENDENT_OPTION(ENABLE_OPENGL "Enables the OpenGL renderer" ON "NOT APPLE" OFF)
 option(ENABLE_VULKAN "Enables the Vulkan renderer" ON)
 
-option(USE_DISCORD_PRESENCE "Enables Discord Rich Presence" OFF)
-
 # Compile options
 CMAKE_DEPENDENT_OPTION(COMPILE_WITH_DWARF "Add DWARF debugging information" ${IS_DEBUG_BUILD} "MINGW" OFF)
 option(ENABLE_LTO "Enable link time optimization" ${DEFAULT_ENABLE_LTO})
-option(CITRA_USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
-option(CITRA_WARNINGS_AS_ERRORS "Enable warnings as errors" ON)
+option(ENCORE_USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
+option(ENCORE_WARNINGS_AS_ERRORS "Enable warnings as errors" ON)
 
-include(CitraHandleSystemLibs)
+include(EncoreHandleSystemLibs)
 
-if (CITRA_USE_PRECOMPILED_HEADERS)
+if (ENCORE_USE_PRECOMPILED_HEADERS)
     message(STATUS "Using Precompiled Headers.")
     set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 
@@ -204,8 +180,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Apply consistent visibility settings.
-set(CMAKE_CXX_VISIBILITY_PRESET default)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN NO)
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 # set up output paths for executable binaries
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
@@ -217,45 +194,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
 # Prefer the -pthread flag on Linux.
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-
-if (ENABLE_QT)
-    if (NOT USE_SYSTEM_QT)
-        download_qt(6.6.0)
-    endif()
-
-    find_package(Qt6 REQUIRED COMPONENTS Widgets Multimedia Concurrent)
-
-    if (UNIX AND NOT APPLE)
-        find_package(Qt6 REQUIRED COMPONENTS DBus)
-    endif()
-
-    if (ENABLE_QT_TRANSLATION)
-        find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
-    endif()
-
-    if (NOT DEFINED QT_TARGET_PATH)
-        # Determine the location of the compile target's Qt.
-        get_target_property(qtcore_path Qt6::Core LOCATION_Release)
-        string(FIND "${qtcore_path}" "/bin/" qtcore_path_bin_pos REVERSE)
-        string(FIND "${qtcore_path}" "/lib/" qtcore_path_lib_pos REVERSE)
-        if (qtcore_path_bin_pos GREATER qtcore_path_lib_pos)
-            string(SUBSTRING "${qtcore_path}" 0 ${qtcore_path_bin_pos} QT_TARGET_PATH)
-        else()
-            string(SUBSTRING "${qtcore_path}" 0 ${qtcore_path_lib_pos} QT_TARGET_PATH)
-        endif()
-    endif()
-
-    if (NOT DEFINED QT_HOST_PATH)
-        # Use the same for host Qt if none is defined.
-        set(QT_HOST_PATH "${QT_TARGET_PATH}")
-    endif()
-
-    message(STATUS "Using target Qt at ${QT_TARGET_PATH}")
-    message(STATUS "Using host Qt at ${QT_HOST_PATH}")
-endif()
-
-# Use system tsl::robin_map if available (otherwise we fallback to version bundled with dynarmic)
-find_package(tsl-robin-map QUIET)
 
 # Platform-specific library requirements
 # ======================================
@@ -296,23 +234,9 @@ find_program(CLANG_FORMAT
     NAMES clang-format${CLANG_FORMAT_POSTFIX}
           clang-format
     PATHS ${PROJECT_BINARY_DIR}/externals)
-# if find_program doesn't find it, try to download from externals
+
 if (NOT CLANG_FORMAT)
-    if (WIN32)
-        message(STATUS "Clang format not found! Downloading...")
-        set(CLANG_FORMAT "${PROJECT_BINARY_DIR}/externals/clang-format${CLANG_FORMAT_POSTFIX}.exe")
-        file(DOWNLOAD
-            https://github.com/citra-emu/ext-windows-bin/raw/master/clang-format${CLANG_FORMAT_POSTFIX}.exe
-            "${CLANG_FORMAT}" SHOW_PROGRESS
-            STATUS DOWNLOAD_SUCCESS)
-        if (NOT DOWNLOAD_SUCCESS EQUAL 0)
-            message(WARNING "Could not download clang format! Disabling the clang format target")
-            file(REMOVE ${CLANG_FORMAT})
-            unset(CLANG_FORMAT)
-        endif()
-    else()
-        message(WARNING "Clang format not found! Disabling the clang format target")
-    endif()
+    message(WARNING "Clang format not found! Disabling the clang format target")
 endif()
 
 if (CLANG_FORMAT)
@@ -378,64 +302,16 @@ add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY
     -DBOOST_DATE_TIME_NO_LIB
     -DBOOST_REGEX_NO_LIB
 )
-if (USE_SYSTEM_BOOST)
-    find_package(Boost 1.70.0 COMPONENTS container locale serialization iostreams REQUIRED)
-endif()
 
 enable_testing()
 add_subdirectory(externals)
 
 # Boost (bundled)
-if (NOT USE_SYSTEM_BOOST)
-    add_definitions( -DBOOST_ALL_NO_LIB )
-    add_library(Boost::boost ALIAS boost)
-    add_library(Boost::serialization ALIAS boost_serialization)
-    add_library(Boost::iostreams ALIAS boost_iostreams)
-endif()
-
-# SDL2
-if (ENABLE_SDL2 AND USE_SYSTEM_SDL2)
-    find_package(SDL2 REQUIRED)
-    add_library(SDL2 INTERFACE)
-    target_link_libraries(SDL2 INTERFACE "${SDL2_LIBRARY}")
-    target_include_directories(SDL2 INTERFACE "${SDL2_INCLUDE_DIR}")
-    add_library(SDL2::SDL2 ALIAS SDL2)
-endif()
-
-if (ENABLE_LIBUSB AND USE_SYSTEM_LIBUSB)
-    include(FindPkgConfig)
-    find_package(LibUSB)
-endif()
-
-if (USE_SYSTEM_SOUNDTOUCH)
-    include(FindPkgConfig)
-    find_package(SoundTouch REQUIRED)
-    add_library(SoundTouch INTERFACE)
-    target_link_libraries(SoundTouch INTERFACE "${SOUNDTOUCH_LIBRARIES}")
-    target_include_directories(SoundTouch INTERFACE "${SOUNDTOUCH_INCLUDE_DIRS}")
-endif()
+add_definitions( -DBOOST_ALL_NO_LIB )
+add_library(Boost::boost ALIAS boost)
+add_library(Boost::serialization ALIAS boost_serialization)
+add_library(Boost::iostreams ALIAS boost_iostreams)
 
 add_subdirectory(src)
 
-
-# Set citra-qt project or citra project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
-if(ENABLE_QT)
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT citra-qt)
-else()
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT citra)
-endif()
-
-# Create target for outputting distributable bundles.
-# Not supported for mobile platforms as distributables are built differently.
-if (NOT ANDROID AND NOT IOS)
-    include(BundleTarget)
-    if (ENABLE_SDL2_FRONTEND)
-        bundle_target(citra)
-    endif()
-    if (ENABLE_QT)
-        bundle_target(citra-qt)
-    endif()
-    if (ENABLE_DEDICATED_ROOM)
-        bundle_target(citra-room)
-    endif()
-endif()
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT encore)

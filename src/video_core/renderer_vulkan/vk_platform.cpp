@@ -3,9 +3,7 @@
 // Refer to the license.txt file included.
 
 // Include the vulkan platform specific header
-#if defined(ANDROID)
-#define VK_USE_PLATFORM_ANDROID_KHR
-#elif defined(WIN32)
+#if defined(WIN32)
 #define VK_USE_PLATFORM_WIN32_KHR
 #elif defined(__APPLE__)
 #define VK_USE_PLATFORM_METAL_EXT
@@ -98,12 +96,6 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(VkDebugReportFlagsEXT 
 
 std::shared_ptr<Common::DynamicLibrary> OpenLibrary(
     [[maybe_unused]] Frontend::GraphicsContext* context) {
-#ifdef ANDROID
-    // Android may override the Vulkan driver from the frontend.
-    if (auto library = context->GetDriverLibrary(); library) {
-        return library;
-    }
-#endif
     auto library = std::make_shared<Common::DynamicLibrary>();
 #ifdef __APPLE__
     const std::string filename = Common::DynamicLibrary::GetLibraryName("vulkan");
@@ -175,18 +167,6 @@ vk::SurfaceKHR CreateSurface(vk::Instance instance, const Frontend::EmuWindow& e
             UNREACHABLE();
         }
     }
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-    if (window_info.type == Frontend::WindowSystemType::Android) {
-        vk::AndroidSurfaceCreateInfoKHR android_ci = {
-            .window = reinterpret_cast<ANativeWindow*>(window_info.render_surface),
-        };
-
-        if (instance.createAndroidSurfaceKHR(&android_ci, nullptr, &surface) !=
-            vk::Result::eSuccess) {
-            LOG_CRITICAL(Render_Vulkan, "Failed to initialize Android surface");
-            UNREACHABLE();
-        }
-    }
 #endif
 
     if (!surface) {
@@ -232,10 +212,6 @@ std::vector<const char*> GetInstanceExtensions(Frontend::WindowSystemType window
 #elif defined(VK_USE_PLATFORM_METAL_EXT)
     case Frontend::WindowSystemType::MacOS:
         extensions.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
-        break;
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-    case Frontend::WindowSystemType::Android:
-        extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
         break;
 #endif
     default:
@@ -304,9 +280,9 @@ vk::UniqueInstance CreateInstance(const Common::DynamicLibrary& library,
     const auto extensions = GetInstanceExtensions(window_type, enable_validation);
 
     const vk::ApplicationInfo application_info = {
-        .pApplicationName = "Citra",
+        .pApplicationName = "Encore",
         .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-        .pEngineName = "Citra Vulkan",
+        .pEngineName = "Encore Vulkan",
         .engineVersion = VK_MAKE_VERSION(1, 0, 0),
         .apiVersion = TargetVulkanApiVersion,
     };

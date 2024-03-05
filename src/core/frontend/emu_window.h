@@ -22,7 +22,6 @@ namespace Frontend {
 /// WindowInformation
 enum class WindowSystemType : u8 {
     Headless,
-    Android,
     Windows,
     MacOS,
     X11,
@@ -90,11 +89,6 @@ public:
 
     /// Releases (dunno if this is the "right" word) the context from the caller thread
     virtual void DoneCurrent(){};
-
-    /// Gets the GPU driver library (used by Android only)
-    virtual std::shared_ptr<Common::DynamicLibrary> GetDriverLibrary() {
-        return {};
-    }
 
     class Scoped {
     public:

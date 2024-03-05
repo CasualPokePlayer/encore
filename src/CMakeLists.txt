@@ -85,14 +85,14 @@ if (MSVC)
         /wd4324 # 'struct_name': structure was padded due to __declspec(align())
     )
 
-    if (CITRA_WARNINGS_AS_ERRORS)
+    if (ENCORE_WARNINGS_AS_ERRORS)
         add_compile_options(/WX)
     endif()
 
     # Since MSVC's debugging information is not very deterministic, so we have to disable it
     # when using ccache or other caching tools
     if (CMAKE_C_COMPILER_LAUNCHER STREQUAL "ccache" OR CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "ccache"
-            OR CITRA_USE_PRECOMPILED_HEADERS)
+            OR ENCORE_USE_PRECOMPILED_HEADERS)
         # Precompiled headers are deleted if not using /Z7. See https://github.com/nanoant/CMakePCHCompiler/issues/21
         add_compile_options(/Z7)
         add_compile_options(/wd5049) # Embedding a full path may result in machine-dependent output
@@ -121,7 +121,7 @@ else()
         add_compile_options(-Wp,-D_FORTIFY_SOURCE=2)
     endif()
 
-    if (CITRA_WARNINGS_AS_ERRORS)
+    if (ENCORE_WARNINGS_AS_ERRORS)
         add_compile_options(-Werror)
     endif()
 
@@ -174,34 +174,5 @@ add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(video_core)
 add_subdirectory(audio_core)
-add_subdirectory(network)
 add_subdirectory(input_common)
-
-if (ENABLE_TESTS)
-    add_subdirectory(tests)
-endif()
-
-if (ENABLE_SDL2 AND ENABLE_SDL2_FRONTEND)
-    add_subdirectory(citra)
-endif()
-
-if (ENABLE_QT)
-    add_subdirectory(citra_qt)
-endif()
-
-if (ENABLE_DEDICATED_ROOM)
-    add_subdirectory(dedicated_room)
-endif()
-
-if (ANDROID)
-    add_subdirectory(android/app/src/main/jni)
-    target_include_directories(citra-android PRIVATE android/app/src/main)
-endif()
-
-if (ENABLE_WEB_SERVICE)
-    add_subdirectory(web_service)
-endif()
-
-if (ENABLE_HEADLESS)
-    add_subdirectory(citra_headless)
-endif()
+add_subdirectory(encore)

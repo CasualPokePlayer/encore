@@ -75,10 +75,6 @@ public:
         return &rasterizer;
     }
 
-    void NotifySurfaceChanged() override {
-        main_window.NotifySurfaceChanged();
-    }
-
     void SwapBuffers() override;
     void TryPresent(int timeout_ms, bool is_secondary) override {}
     void Sync() override;
