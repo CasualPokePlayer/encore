@@ -154,23 +154,6 @@ if (EXISTS "${PROJECT_SOURCE_DIR}/.git/objects")
     check_submodules_present()
 endif()
 
-configure_file(${PROJECT_SOURCE_DIR}/dist/compatibility_list/compatibility_list.qrc
-               ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.qrc
-               COPYONLY)
-if (ENABLE_COMPATIBILITY_LIST_DOWNLOAD AND NOT EXISTS ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json)
-    message(STATUS "Downloading compatibility list for citra...")
-    file(DOWNLOAD
-        https://api.citra-emu.org/gamedb/
-        "${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json" SHOW_PROGRESS)
-endif()
-if (EXISTS ${PROJECT_SOURCE_DIR}/dist/compatibility_list/compatibility_list.json)
-    file(COPY "${PROJECT_SOURCE_DIR}/dist/compatibility_list/compatibility_list.json"
-        DESTINATION "${PROJECT_BINARY_DIR}/dist/compatibility_list/")
-endif()
-if (NOT EXISTS ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json)
-    file(WRITE ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json "")
-endif()
-
 # Detect current compilation architecture and create standard definitions
 # =======================================================================
 
@@ -433,7 +416,6 @@ if (USE_SYSTEM_SOUNDTOUCH)
 endif()
 
 add_subdirectory(src)
-add_subdirectory(dist/installer)
 
 
 # Set citra-qt project or citra project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
@@ -455,33 +437,5 @@ if (NOT ANDROID AND NOT IOS)
     endif()
     if (ENABLE_DEDICATED_ROOM)
         bundle_target(citra-room)
-    endif()
-endif()
-
-# Installation instructions
-# =========================
-
-# Install freedesktop.org metadata files, following those specifications:
-# http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html
-# http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
-# http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html
-if(ENABLE_QT AND UNIX AND NOT APPLE)
-    install(FILES "${PROJECT_SOURCE_DIR}/dist/citra-qt.desktop"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/share/applications")
-    install(FILES "${PROJECT_SOURCE_DIR}/dist/citra.svg"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/scalable/apps")
-    install(FILES "${PROJECT_SOURCE_DIR}/dist/citra.xml"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mime/packages")
-endif()
-
-if(UNIX)
-    if(ENABLE_SDL2)
-        install(FILES "${PROJECT_SOURCE_DIR}/dist/citra.6"
-                DESTINATION "${CMAKE_INSTALL_PREFIX}/share/man/man6")
-    endif()
-
-    if (ENABLE_QT)
-        install(FILES "${PROJECT_SOURCE_DIR}/dist/citra-qt.6"
-                DESTINATION "${CMAKE_INSTALL_PREFIX}/share/man/man6")
     endif()
 endif()

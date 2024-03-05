@@ -95,6 +95,7 @@ if (MSVC)
             OR CITRA_USE_PRECOMPILED_HEADERS)
         # Precompiled headers are deleted if not using /Z7. See https://github.com/nanoant/CMakePCHCompiler/issues/21
         add_compile_options(/Z7)
+        add_compile_options(/wd5049) # Embedding a full path may result in machine-dependent output
     else()
         add_compile_options(/Zi)
     endif()

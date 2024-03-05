@@ -4,6 +4,7 @@
 
 #include "common/settings.h"
 #include "emu_window_headless_gl.h"
+#include "video_core/gpu.h"
 #include "video_core/renderer_base.h"
 #include "video_core/renderer_opengl/gl_state.h"
 
@@ -86,7 +87,7 @@ void EmuWindow_Headless_GL::Present() {
 
     // present to our FBO
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_texture_fbo.handle);
-    system.Renderer().TryPresent(0);
+    system.GPU().Renderer().TryPresent(0);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     // start async readback of our FBO

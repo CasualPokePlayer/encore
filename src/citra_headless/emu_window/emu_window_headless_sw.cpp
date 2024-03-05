@@ -4,6 +4,7 @@
 
 #include "common/settings.h"
 #include "emu_window_headless_sw.h"
+#include "video_core/gpu.h"
 #include "video_core/renderer_base.h"
 #include "video_core/renderer_software/renderer_software.h"
 
@@ -18,7 +19,7 @@ EmuWindow_Headless_SW::~EmuWindow_Headless_SW() = default;
 
 void EmuWindow_Headless_SW::Present() {
     // TODO: Recheck this when the software renderer isn't just broken
-    const auto& renderer = static_cast<SwRenderer::RendererSoftware&>(system.Renderer());
+    const auto& renderer = static_cast<SwRenderer::RendererSoftware&>(system.GPU().Renderer());
     const auto draw_screen = [&](VideoCore::ScreenId screen_id) {
         const auto& info = renderer.Screen(screen_id);
         const auto src = info.pixels.data();

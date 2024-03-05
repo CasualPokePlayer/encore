@@ -12,7 +12,9 @@
 #include "core/frontend/input.h"
 #include "core/hle/service/am/am.h"
 #include "core/hw/aes/key.h"
+#include "core/loader/loader.h"
 #include "network/network.h"
+#include "video_core/gpu.h"
 #include "video_core/renderer_base.h"
 #include "video_core/renderer_opengl/gl_state.h"
 
@@ -181,7 +183,7 @@ std::optional<std::string> CitraContext::LoadROM(const std::string& rom_path) {
     }
 
     std::atomic_bool stop_run{};
-    system.Renderer().Rasterizer()->LoadDiskResources(stop_run, [](auto, auto, auto) {});
+    system.GPU().Renderer().Rasterizer()->LoadDiskResources(stop_run, [](auto, auto, auto) {});
     return std::nullopt;
 }
 

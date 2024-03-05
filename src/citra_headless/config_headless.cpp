@@ -4,6 +4,7 @@
 
 #include <codecvt>
 
+#include "common/file_util.h"
 #include "common/settings.h"
 #include "core/hle/service/cfg/cfg.h"
 #include "core/hle/service/ptm/ptm.h"
@@ -193,7 +194,7 @@ void Config_Headless::LoadSyncSettings() {
     ReadSetting(Settings::values.init_time);
 
     // CFG
-    const auto cfg = std::make_unique<Service::CFG::Module>();
+    const auto cfg = Service::CFG::GetModule(system);
 
     char username_buffer[11]{};
     callbacks.GetString("username", username_buffer, sizeof(username_buffer));
