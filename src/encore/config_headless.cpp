@@ -3,6 +3,7 @@
 // Refer to the license.txt file included.
 
 #include <codecvt>
+#include <locale>
 
 #include "common/file_util.h"
 #include "common/settings.h"

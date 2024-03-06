@@ -70,7 +70,7 @@ constexpr auto MAX_UNCOMPRESSED_STATE_SIZE = ONE_MiB * 300;
 constexpr auto STARTING_COMPRESSED_STATE_SIZE = ONE_MiB * 32;
 
 Savestate_MT::Savestate_MT(Core::System& system_) : system(system_) {
-    state_buffer = std::make_shared_for_overwrite<u8[]>(MAX_UNCOMPRESSED_STATE_SIZE);
+    state_buffer = std::shared_ptr<u8[]>(new u8[MAX_UNCOMPRESSED_STATE_SIZE]);
     cur_state.reserve(STARTING_COMPRESSED_STATE_SIZE);
     cstream = ZSTD_createCStream();
     dstream = ZSTD_createDStream();

@@ -3,6 +3,7 @@
 // Refer to the license.txt file included.
 
 #include <chrono>
+#include <climits>
 
 #include <fmt/format.h>
 

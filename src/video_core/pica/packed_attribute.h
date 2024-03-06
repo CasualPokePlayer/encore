@@ -11,6 +11,25 @@
 
 namespace Pica {
 
+// std::bit_cast is not available in GCC 10 / libstdc++ on Debian 11
+#if defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast == 201806L
+#define bit_cast std::bit_cast
+#else
+// taken from libc++ bit_cast implementation (Apache License v2.0 with LLVM Exceptions)
+template <typename To, typename From,
+          typename = std::enable_if_t<
+              sizeof(To) == sizeof(From) && std::is_trivially_constructible<To>::value &&
+              std::is_trivially_copyable<To>::value && std::is_trivially_copyable<From>::value>>
+inline constexpr To bit_cast(const From& from) {
+    To to;
+    char* dst = reinterpret_cast<char*>(&to);
+    const char* src = reinterpret_cast<const char*>(&from);
+    for (unsigned i = 0; i < sizeof(To); ++i)
+        dst[i] = src[i];
+    return to;
+}
+#endif
+
 /**
  * Uniforms and fixed attributes are written in a packed format such that four float24 values are
  * encoded in three 32-bit numbers. Uniforms can also encode four float32 values in four 32-bit
@@ -56,7 +75,7 @@ private:
     constexpr Common::Vec4<f24> AsFloat32() const {
         Common::Vec4<f24> uniform;
         for (u32 i = 0; i < 4; i++) {
-            const f32 buffer_value = std::bit_cast<f32>(buffer[i]);
+            const f32 buffer_value = bit_cast<f32>(buffer[i]);
             uniform[3 - i] = f24::FromFloat32(buffer_value);
         }
         return uniform;
