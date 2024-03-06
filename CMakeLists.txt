@@ -229,11 +229,11 @@ endif()
 # against all the src files. This should be used before making a pull request.
 # =======================================================================
 
-set(CLANG_FORMAT_POSTFIX "-15")
 find_program(CLANG_FORMAT
-    NAMES clang-format${CLANG_FORMAT_POSTFIX}
-          clang-format
-    PATHS ${PROJECT_BINARY_DIR}/externals)
+    NAMES clang-format-15
+          clang-format-16
+          clang-format-17
+          clang-format)
 
 if (NOT CLANG_FORMAT)
     message(WARNING "Clang format not found! Disabling the clang format target")
