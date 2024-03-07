@@ -49,8 +49,8 @@ class Vec2 {
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int file_version) {
-        ar& x;
-        ar& y;
+        ar & x;
+        ar & y;
     }
 
 public:
@@ -217,9 +217,9 @@ class Vec3 {
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int file_version) {
-        ar& x;
-        ar& y;
-        ar& z;
+        ar & x;
+        ar & y;
+        ar & z;
     }
 
 public:
@@ -447,10 +447,10 @@ class Vec4 {
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int file_version) {
-        ar& x;
-        ar& y;
-        ar& z;
-        ar& w;
+        ar & x;
+        ar & y;
+        ar & z;
+        ar & w;
     }
 
 public:

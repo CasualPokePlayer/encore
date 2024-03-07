@@ -54,10 +54,16 @@ ENCORE_EXPORT void Encore_Reset(EncoreContext* context) {
     context->Reset();
 }
 
-ENCORE_EXPORT void Encore_GetVideoDimensions(EncoreContext* context, u32* x, u32* y) {
-    const auto& video_dimensions = context->GetVideoDimensions();
-    *x = std::get<0>(video_dimensions);
-    *y = std::get<1>(video_dimensions);
+ENCORE_EXPORT void Encore_GetVideoVirtualDimensions(EncoreContext* context, u32* w, u32* h) {
+    const auto& virtual_dimensions = context->GetVideoVirtualDimensions();
+    *w = std::get<0>(virtual_dimensions);
+    *h = std::get<1>(virtual_dimensions);
+}
+
+ENCORE_EXPORT void Encore_GetVideoBufferDimensions(EncoreContext* context, u32* w, u32* h) {
+    const auto& buffer_dimensions = context->GetVideoBufferDimensions();
+    *w = std::get<0>(buffer_dimensions);
+    *h = std::get<1>(buffer_dimensions);
 }
 
 ENCORE_EXPORT u32 Encore_GetGLTexture(EncoreContext* context) {

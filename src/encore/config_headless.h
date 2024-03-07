@@ -25,7 +25,6 @@ public:
     ~Config_Headless();
 
     void Reload();
-    u32 GetWindowScaleFactor() const;
 
 private:
     template <typename Type, bool ranged>
@@ -37,7 +36,6 @@ private:
 
     Core::System& system;
     ConfigCallbackInterface callbacks;
-    u32 window_scale_factor;
 };
 
 } // namespace Headless

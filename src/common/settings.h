@@ -403,9 +403,6 @@ struct InputProfile {
     std::string touch_device;
     bool use_touch_from_button;
     int touch_from_button_map_index;
-    std::string udp_input_address;
-    u16 udp_input_port;
-    u8 udp_pad_index;
 };
 
 struct TouchFromButtonMap {
@@ -453,7 +450,7 @@ struct Values {
 #elif defined(ENABLE_SOFTWARE_RENDERER)
         GraphicsAPI::Software,
 #else
-// TODO: Add a null renderer backend for this, perhaps.
+        // TODO: Add a null renderer backend for this, perhaps.
 #error "At least one renderer must be enabled."
 #endif
             GraphicsAPI::Software, GraphicsAPI::Vulkan, "graphics_api"

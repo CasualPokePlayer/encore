@@ -35,11 +35,11 @@ private:
 
 using namespace Headless;
 
-EmuWindow_Headless_GL::EmuWindow_Headless_GL(Core::System& system, u32 window_scale_factor,
+EmuWindow_Headless_GL::EmuWindow_Headless_GL(Core::System& system,
                                              GLCallbackInterface& gl_interface_)
     : EmuWindow_Headless(system), gl_interface(gl_interface_) {
     context = std::make_unique<HeadlessSharedContext>(gl_interface);
-    ReloadConfig(window_scale_factor);
+    ReloadConfig();
     const auto& layout = GetFramebufferLayout();
     width = layout.width;
     height = layout.height;
@@ -110,7 +110,11 @@ u32 EmuWindow_Headless_GL::GetGLTexture() const {
     return final_texture.handle;
 }
 
-std::pair<u32, u32> EmuWindow_Headless_GL::GetVideoDimensions() const {
+std::pair<u32, u32> EmuWindow_Headless_GL::GetVideoVirtualDimensions() const {
+    return std::make_pair(unscaled_width, unscaled_height);
+}
+
+std::pair<u32, u32> EmuWindow_Headless_GL::GetVideoBufferDimensions() const {
     return std::make_pair(width, height);
 }
 
@@ -131,7 +135,7 @@ void EmuWindow_Headless_GL::ReadFrameBuffer(u32* dest_buffer) const {
     glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
-void EmuWindow_Headless_GL::ReloadConfig(u32 window_scale_factor) {
+void EmuWindow_Headless_GL::ReloadConfig() {
     // in case of a custom layout, which case we need to do some more work for the correct layout
     if (Settings::values.custom_layout.GetValue()) {
         auto layout = Layout::CustomFrameLayout(1, 1, Settings::values.swap_screen.GetValue());
@@ -152,8 +156,12 @@ void EmuWindow_Headless_GL::ReloadConfig(u32 window_scale_factor) {
     }
 
     const auto& layout = GetFramebufferLayout();
-    UpdateCurrentFramebufferLayout(layout.width * window_scale_factor,
-                                   layout.height * window_scale_factor, false);
+    unscaled_width = layout.width;
+    unscaled_height = layout.height;
+
+    const auto scale_factor = Settings::values.resolution_factor.GetValue();
+    UpdateCurrentFramebufferLayout(unscaled_width * scale_factor, unscaled_height * scale_factor,
+                                   false);
 }
 
 std::unique_ptr<Frontend::GraphicsContext> EmuWindow_Headless_GL::CreateSharedContext() const {

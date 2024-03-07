@@ -17,9 +17,10 @@ public:
 
     void RunFrame();
 
-    virtual std::pair<u32, u32> GetVideoDimensions() const = 0;
+    virtual std::pair<u32, u32> GetVideoVirtualDimensions() const;
+    virtual std::pair<u32, u32> GetVideoBufferDimensions() const = 0;
     virtual void ReadFrameBuffer(u32* dest_buffer) const = 0;
-    virtual void ReloadConfig(u32 window_scale_factor) = 0;
+    virtual void ReloadConfig() = 0;
 
     void PollEvents() override;
 

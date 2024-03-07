@@ -13,9 +13,9 @@ public:
     explicit EmuWindow_Headless_SW(Core::System& system);
     ~EmuWindow_Headless_SW();
 
-    std::pair<u32, u32> GetVideoDimensions() const override;
+    std::pair<u32, u32> GetVideoBufferDimensions() const override;
     void ReadFrameBuffer(u32* dest_buffer) const override;
-    void ReloadConfig(u32 window_scale_factor) override;
+    void ReloadConfig() override;
 
 protected:
     void Present() override;

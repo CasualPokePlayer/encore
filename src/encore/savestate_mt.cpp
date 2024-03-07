@@ -127,7 +127,7 @@ std::size_t Savestate_MT::StartSaveState() {
 
     oarchive oa{save_buf, boost::archive::archive_flags::no_header |
                               boost::archive::archive_flags::no_codecvt};
-    oa& system;
+    oa & system;
 
     state_done.store(true, std::memory_order_relaxed);
     compression_thread.join();
@@ -176,7 +176,7 @@ void Savestate_MT::LoadState(void* src_buffer, std::size_t buffer_len) {
 
     iarchive ia{load_buf, boost::archive::archive_flags::no_header |
                               boost::archive::archive_flags::no_codecvt};
-    ia& system;
+    ia & system;
 
     decompression_thread.join(); // should be a no-op in practice
 }

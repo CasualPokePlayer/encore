@@ -30,10 +30,6 @@ void Config_Headless::Reload() {
     system.ApplySettings();
 }
 
-u32 Config_Headless::GetWindowScaleFactor() const {
-    return window_scale_factor;
-}
-
 template <>
 void Config_Headless::ReadSetting(Settings::Setting<std::string>& setting) {
     char buffer[4096]{};
@@ -75,9 +71,6 @@ void Config_Headless::LoadConstantSettings() {
 
     Settings::values.current_input_profile.use_touch_from_button = false;
     Settings::values.current_input_profile.touch_from_button_map_index = 0;
-    Settings::values.current_input_profile.udp_input_address = "";
-    Settings::values.current_input_profile.udp_input_port = 0;
-    Settings::values.current_input_profile.udp_pad_index = 0;
 
     Settings::values.current_input_profile_index = 0;
     Settings::values.input_profiles.clear();
@@ -85,6 +78,11 @@ void Config_Headless::LoadConstantSettings() {
     Settings::values.touch_from_button_maps.clear();
 
     // Renderer
+    Settings::values.physical_device =
+        0; // doesn't mean anything outside of Vulkan (not yet supported)
+    Settings::values.spirv_shader_gen = true; // ditto
+    Settings::values.async_presentation =
+        false; // only allow presenting on the main thread (doesn't make sense otherwise)
     Settings::values.use_gles = false;             // only standard OpenGL supported for now
     Settings::values.use_disk_shader_cache = true; // no need to expose this to the user
     Settings::values.frame_limit = 0;              // unthrottled (frontend handles this)
@@ -119,9 +117,7 @@ void Config_Headless::LoadConstantSettings() {
     Settings::values.use_custom_storage = false; // we'll control this with the user directory
 
     // System
-    Settings::values.init_time_offset = 0;          // offset to real time?
-    Settings::values.plugin_loader_enabled = false; // TODO reconsider
-    Settings::values.allow_plugin_loader = false;
+    Settings::values.init_time_offset = 0; // offset to real time?
 
     // Camera
     for (int i = 0; i < Service::CAM::NumCameras; ++i) {
@@ -165,6 +161,7 @@ void Config_Headless::LoadSyncSettings() {
 
     // Renderer
     ReadSetting(Settings::values.graphics_api);
+    ReadSetting(Settings::values.async_shader_compilation);
     ReadSetting(Settings::values.use_hw_shader);
     ReadSetting(Settings::values.shaders_accurate_mul);
     ReadSetting(Settings::values.use_shader_jit);
@@ -183,9 +180,14 @@ void Config_Headless::LoadSyncSettings() {
 
     // System
     ReadSetting(Settings::values.is_new_3ds);
+    ReadSetting(Settings::values.lle_applets);
     ReadSetting(Settings::values.region_value);
     ReadSetting(Settings::values.init_clock);
     ReadSetting(Settings::values.init_time);
+    ReadSetting(Settings::values.init_ticks_type);
+    ReadSetting(Settings::values.init_ticks_override);
+    ReadSetting(Settings::values.plugin_loader_enabled);
+    ReadSetting(Settings::values.allow_plugin_loader);
 
     // CFG
     const auto cfg = Service::CFG::GetModule(system);
@@ -210,6 +212,7 @@ void Config_Headless::LoadNonSyncSettings() {
     // Renderer
     ReadSetting(Settings::values.resolution_factor);
     ReadSetting(Settings::values.texture_filter);
+    ReadSetting(Settings::values.texture_sampling);
 
     ReadSetting(Settings::values.mono_render_option);
     ReadSetting(Settings::values.render_3d);
@@ -235,7 +238,4 @@ void Config_Headless::LoadNonSyncSettings() {
     ReadSetting(Settings::values.custom_bottom_right);
     ReadSetting(Settings::values.custom_bottom_bottom);
     ReadSetting(Settings::values.custom_second_layer_opacity);
-
-    // special headless specific setting
-    window_scale_factor = static_cast<u32>(callbacks.GetInteger("window_scale_factor"));
 }

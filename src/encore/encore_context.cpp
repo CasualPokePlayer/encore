@@ -34,8 +34,7 @@ EncoreContext::EncoreContext(ConfigCallbackInterface& config_interface,
     config = std::make_unique<Config_Headless>(system, config_interface);
     Frontend::RegisterDefaultApplets(system);
     if (Settings::values.graphics_api.GetValue() == Settings::GraphicsAPI::OpenGL) {
-        window = std::make_unique<EmuWindow_Headless_GL>(system, config->GetWindowScaleFactor(),
-                                                         gl_interface);
+        window = std::make_unique<EmuWindow_Headless_GL>(system, gl_interface);
     } else {
         window = std::make_unique<EmuWindow_Headless_SW>(system);
     }
@@ -193,8 +192,12 @@ void EncoreContext::Reset() {
     system.Reset();
 }
 
-std::pair<u32, u32> EncoreContext::GetVideoDimensions() const {
-    return window->GetVideoDimensions();
+std::pair<u32, u32> EncoreContext::GetVideoVirtualDimensions() const {
+    return window->GetVideoVirtualDimensions();
+}
+
+std::pair<u32, u32> EncoreContext::GetVideoBufferDimensions() const {
+    return window->GetVideoBufferDimensions();
 }
 
 u32 EncoreContext::GetGLTexture() const {
@@ -213,7 +216,7 @@ std::span<const s16> EncoreContext::GetAudio() const {
 
 void EncoreContext::ReloadConfig() const {
     config->Reload();
-    window->ReloadConfig(config->GetWindowScaleFactor());
+    window->ReloadConfig();
 }
 
 std::size_t EncoreContext::StartSaveState() {

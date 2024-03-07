@@ -59,11 +59,11 @@ struct WifiPacket {
 private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int) {
-        ar& type;
-        ar& data;
-        ar& transmitter_address;
-        ar& destination_address;
-        ar& channel;
+        ar & type;
+        ar & data;
+        ar & transmitter_address;
+        ar & destination_address;
+        ar & channel;
     }
     friend class boost::serialization::access;
 };
@@ -589,8 +589,8 @@ private:
     private:
         template <class Archive>
         void serialize(Archive& ar, const unsigned int) {
-            ar& connected;
-            ar& node_id;
+            ar & connected;
+            ar & node_id;
         }
         friend class boost::serialization::access;
     };
