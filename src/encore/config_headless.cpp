@@ -181,6 +181,7 @@ void Config_Headless::LoadSyncSettings() {
     // System
     ReadSetting(Settings::values.is_new_3ds);
     ReadSetting(Settings::values.lle_applets);
+    ReadSetting(Settings::values.allow_async_file_io);
     ReadSetting(Settings::values.region_value);
     ReadSetting(Settings::values.init_clock);
     ReadSetting(Settings::values.init_time);

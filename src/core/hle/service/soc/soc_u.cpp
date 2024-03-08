@@ -451,7 +451,7 @@ std::optional<std::reference_wrapper<SocketHolder>> SOC_U::GetSocketHolder(u32 c
     if (Settings::values.want_determinism.GetValue()) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
         rb.Push(ResultInvalidSocketDescriptor);
-        return;
+        return std::nullopt;
     }
     return std::ref(fd_info->second);
 }

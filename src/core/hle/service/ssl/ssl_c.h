@@ -5,6 +5,7 @@
 #pragma once
 
 #include <random>
+#include <boost/serialization/binary_object.hpp>
 #include "core/hle/service/service.h"
 
 namespace Core {
@@ -21,12 +22,13 @@ private:
     void Initialize(Kernel::HLERequestContext& ctx);
     void GenerateRandomData(Kernel::HLERequestContext& ctx);
 
-    std::minstd_rand deterministic_random_gen{0};
+    std::minstd_rand deterministic_random_gen{};
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int) {
         ar& boost::serialization::base_object<Kernel::SessionRequestHandler>(*this);
-        ar & deterministic_random_gen;
+        ar& boost::serialization::make_binary_object(&deterministic_random_gen,
+                                                     sizeof(deterministic_random_gen));
     }
 
     friend class boost::serialization::access;
