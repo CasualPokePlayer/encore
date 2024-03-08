@@ -12,6 +12,7 @@
 #include "common/archives.h"
 #include "common/assert.h"
 #include "common/scope_exit.h"
+#include "common/settings.h"
 #include "common/string_util.h"
 #include "core/core.h"
 #include "core/file_sys/archive_ncch.h"
@@ -1933,6 +1934,13 @@ bool HTTP_C::PerformStateChecks(Kernel::HLERequestContext& ctx, IPC::RequestPars
                                 Context::Handle context_handle) {
     const auto* session_data = EnsureSessionInitialized(ctx, rp);
     if (!session_data) {
+        return false;
+    }
+
+    // don't allow HTTP usage when we want determinism
+    if (!Settings::values.want_determinism.GetValue()) {
+        IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+        rb.Push(ErrorStateError);
         return false;
     }
 

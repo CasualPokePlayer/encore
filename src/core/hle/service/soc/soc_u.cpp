@@ -13,6 +13,7 @@
 #include "common/common_types.h"
 #include "common/logging/log.h"
 #include "common/scope_exit.h"
+#include "common/settings.h"
 #include "common/swap.h"
 #include "core/core.h"
 #include "core/hle/ipc_helpers.h"
@@ -445,6 +446,13 @@ std::optional<std::reference_wrapper<SocketHolder>> SOC_U::GetSocketHolder(u32 c
         rb.Push(ResultWrongProcess);
         return std::nullopt;
     }
+    // block socket usage if we want determinism
+    // (this shouldn't be reachable, but just in case)
+    if (Settings::values.want_determinism.GetValue()) {
+        IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+        rb.Push(ResultInvalidSocketDescriptor);
+        return;
+    }
     return std::ref(fd_info->second);
 }
 
@@ -804,6 +812,13 @@ void SOC_U::Socket(Kernel::HLERequestContext& ctx) {
     const u32 pid = rp.PopPID();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+
+    // block socket usage if we want determinism
+    if (Settings::values.want_determinism.GetValue()) {
+        rb.Push(UnimplementedFunction(ErrorModule::SOC));
+        rb.Skip(1, false);
+        return;
+    }
 
     // Only 0 is allowed according to 3dbrew, using 0 will let the OS decide which protocol to use
     if (protocol != 0) {

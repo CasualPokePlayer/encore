@@ -5,6 +5,7 @@
 #include <boost/serialization/unique_ptr.hpp>
 #include "common/archives.h"
 #include "common/logging/log.h"
+#include "common/settings.h"
 #include "core/core.h"
 #include "core/file_sys/errors.h"
 #include "core/file_sys/file_backend.h"
@@ -114,7 +115,8 @@ void File::Read(Kernel::HLERequestContext& ctx) {
     async_data->buffer = &rp.PopMappedBuffer();
     async_data->length = length;
     async_data->offset = offset;
-    async_data->cache_ready = backend->CacheReady(offset, length);
+    async_data->cache_ready =
+        backend->CacheReady(offset, length) || !Settings::values.allow_async_file_io.GetValue();
     if (!async_data->cache_ready) {
         async_data->pre_timer = std::chrono::steady_clock::now();
     }

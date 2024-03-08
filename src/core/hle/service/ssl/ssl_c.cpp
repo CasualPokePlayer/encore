@@ -2,9 +2,11 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <algorithm>
 #include <openssl/rand.h>
 #include "common/archives.h"
 #include "common/common_types.h"
+#include "common/settings.h"
 #include "core/core.h"
 #include "core/hle/ipc.h"
 #include "core/hle/ipc_helpers.h"
@@ -28,7 +30,13 @@ void SSL_C::GenerateRandomData(Kernel::HLERequestContext& ctx) {
     auto buffer = rp.PopMappedBuffer();
 
     std::vector<u8> out_data(size);
-    SSL::GenerateRandomData(out_data);
+    if (Settings::values.want_determinism.GetValue()) {
+        std::generate(out_data.begin(), out_data.end(),
+                      [this] { return deterministic_random_gen() >> 24; });
+    } else {
+        SSL::GenerateRandomData(out_data);
+    }
+
     buffer.Write(out_data.data(), 0, size);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);

@@ -426,6 +426,7 @@ struct Values {
     SwitchableSetting<s32, true> cpu_clock_percentage{100, 5, 400, "cpu_clock_percentage"};
     SwitchableSetting<bool> is_new_3ds{true, "is_new_3ds"};
     SwitchableSetting<bool> lle_applets{false, "lle_applets"};
+    SwitchableSetting<bool> allow_async_file_io{true, "allow_async_file_io"};
 
     // Data Storage
     Setting<bool> use_virtual_sd{true, "use_virtual_sd"};
@@ -535,6 +536,7 @@ struct Values {
 
     // Miscellaneous
     Setting<std::string> log_filter{"*:Info", "log_filter"};
+    Setting<bool> want_determinism{false, "want_determinism"};
 
     // Video Dumping
     std::string output_format;

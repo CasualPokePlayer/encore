@@ -1481,6 +1481,12 @@ NWM_UDS::NWM_UDS(Core::System& system) : ServiceFramework("nwm::UDS"), system(sy
     // Keep the Nintendo 3DS MAC header and randomly generate the last 3 bytes
     rng.GenerateBlock(static_cast<CryptoPP::byte*>(mac.data() + 3), 3);
 
+    if (Settings::values.want_determinism.GetValue()) {
+        mac[3] = 'E';
+        mac[4] = 'N';
+        mac[5] = 'C';
+    }
+
     system.Kernel().GetSharedPageHandler().SetMacAddress(mac);
 
     LOG_ERROR(Service_NWM, "Network is not supported");

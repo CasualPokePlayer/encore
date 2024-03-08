@@ -189,6 +189,9 @@ void Config_Headless::LoadSyncSettings() {
     ReadSetting(Settings::values.plugin_loader_enabled);
     ReadSetting(Settings::values.allow_plugin_loader);
 
+    // Misc
+    ReadSetting(Settings::values.want_determinism);
+
     // CFG
     const auto cfg = Service::CFG::GetModule(system);
 
@@ -202,6 +205,9 @@ void Config_Headless::LoadSyncSettings() {
         static_cast<Service::CFG::SystemLanguage>(callbacks.GetInteger("language")));
     cfg->SetSoundOutputMode(
         static_cast<Service::CFG::SoundOutputMode>(callbacks.GetInteger("sound_mode")));
+    if (Settings::values.want_determinism.GetValue()) {
+        cfg->SetConsoleUniqueId(0, 0); // TODO: make this configurable
+    }
     cfg->UpdateConfigNANDSavegame();
 
     // PTM

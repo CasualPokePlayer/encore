@@ -21,7 +21,15 @@ private:
     void Initialize(Kernel::HLERequestContext& ctx);
     void GenerateRandomData(Kernel::HLERequestContext& ctx);
 
-    SERVICE_SERIALIZATION_SIMPLE
+    std::minstd_rand deterministic_random_gen{0};
+
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int) {
+        ar& boost::serialization::base_object<Kernel::SessionRequestHandler>(*this);
+        ar & deterministic_random_gen;
+    }
+
+    friend class boost::serialization::access;
 };
 
 void InstallInterfaces(Core::System& system);

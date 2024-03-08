@@ -18,8 +18,6 @@ public:
     ~PS_PS() = default;
 
 private:
-    SERVICE_SERIALIZATION_SIMPLE
-
     /**
      * PS_PS::SignRsaSha256 service function
      *  Inputs:
@@ -227,6 +225,16 @@ private:
      *      2 :
      */
     void InterfaceForPXI_0x04040044(Kernel::HLERequestContext& ctx);
+
+    std::minstd_rand deterministic_random_gen{0};
+
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int) {
+        ar& boost::serialization::base_object<Kernel::SessionRequestHandler>(*this);
+        ar & deterministic_random_gen;
+    }
+
+    friend class boost::serialization::access;
 };
 
 /// Initializes the PS_PS Service

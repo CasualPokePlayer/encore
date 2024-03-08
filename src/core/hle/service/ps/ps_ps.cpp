@@ -6,6 +6,7 @@
 #include <cryptopp/modes.h>
 #include "common/archives.h"
 #include "common/logging/log.h"
+#include "common/settings.h"
 #include "core/core.h"
 #include "core/hle/ipc_helpers.h"
 #include "core/hle/service/ps/ps_ps.h"
@@ -153,7 +154,13 @@ void PS_PS::GenerateRandomBytes(Kernel::HLERequestContext& ctx) {
     auto buffer = rp.PopMappedBuffer();
 
     std::vector<u8> out_data(size);
-    SSL::GenerateRandomData(out_data);
+    if (Settings::values.want_determinism.GetValue()) {
+        std::generate(out_data.begin(), out_data.end(),
+                      [this] { return deterministic_random_gen() >> 24; });
+    } else {
+        SSL::GenerateRandomData(out_data);
+    }
+
     buffer.Write(out_data.data(), 0, size);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
