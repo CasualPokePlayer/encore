@@ -181,10 +181,12 @@ std::optional<std::string> EncoreContext::LoadROM(const std::string& rom_path) {
     return std::nullopt;
 }
 
-void EncoreContext::RunFrame() {
+bool EncoreContext::RunFrame() {
+    system.GPU().SetLagged();
     window->MakeCurrent();
     window->RunFrame();
     audio_resampler->Flush();
+    return system.GPU().GetLagged();
 }
 
 void EncoreContext::Reset() {

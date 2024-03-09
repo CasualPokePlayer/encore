@@ -19,7 +19,7 @@ public:
 
     std::pair<bool, std::string> InstallCIA(const std::string& cia_path);
     std::optional<std::string> LoadROM(const std::string& rom_path);
-    void RunFrame();
+    bool RunFrame();
     void Reset();
     std::pair<u32, u32> GetVideoVirtualDimensions() const;
     std::pair<u32, u32> GetVideoBufferDimensions() const;

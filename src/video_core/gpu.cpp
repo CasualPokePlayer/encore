@@ -37,6 +37,7 @@ struct GPU::Impl {
     std::unique_ptr<SwRenderer::SwBlitter> sw_blitter;
     Core::TimingEventType* vblank_event;
     Service::GSP::InterruptHandler signal_interrupt;
+    bool lagged{};
 
     explicit Impl(Core::System& system, Frontend::EmuWindow& emu_window,
                   Frontend::EmuWindow* secondary_window)
@@ -232,6 +233,7 @@ void GPU::SetBufferSwap(u32 screen_id, const Service::GSP::FrameBufferInfo& info
     if (screen_id == 0) {
         MicroProfileFlip();
         impl->system.perf_stats->EndGameFrame();
+        impl->lagged = false;
     }
 }
 
@@ -310,6 +312,14 @@ void GPU::WriteReg(VAddr addr, u32 data) {
 
 void GPU::Sync() {
     impl->renderer->Sync();
+}
+
+bool GPU::GetLagged() {
+    return impl->lagged;
+}
+
+void GPU::SetLagged() {
+    impl->lagged = true;
 }
 
 VideoCore::RendererBase& GPU::Renderer() {

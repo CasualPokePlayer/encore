@@ -46,8 +46,8 @@ ENCORE_EXPORT bool Encore_LoadROM(EncoreContext* context, const char* rom_path,
     return true;
 }
 
-ENCORE_EXPORT void Encore_RunFrame(EncoreContext* context) {
-    context->RunFrame();
+ENCORE_EXPORT bool Encore_RunFrame(EncoreContext* context) {
+    return context->RunFrame();
 }
 
 ENCORE_EXPORT void Encore_Reset(EncoreContext* context) {

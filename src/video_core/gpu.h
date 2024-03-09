@@ -77,6 +77,12 @@ public:
     /// Synchronizes fixed function renderer state with PICA registers.
     void Sync();
 
+    /// Returns the current lag flag.
+    bool GetLagged();
+
+    /// Sets the lag flag.
+    void SetLagged();
+
     /// Returns a mutable reference to the renderer.
     [[nodiscard]] VideoCore::RendererBase& Renderer();
 
