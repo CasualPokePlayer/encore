@@ -265,15 +265,6 @@ private:
     private:
         ResultFunctor functor;
         std::future<void> future;
-
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int) {
-            if (!Archive::is_loading::value && future.valid()) {
-                future.wait();
-            }
-            ar & functor;
-        }
-        friend class boost::serialization::access;
     };
 
 public:

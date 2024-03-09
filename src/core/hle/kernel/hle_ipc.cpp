@@ -64,8 +64,15 @@ private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int) {
         ar& boost::serialization::base_object<Kernel::WakeupCallback>(*this);
-        ar & callback;
         ar & context;
+        // callback might not be able to be serialized here, if it is an AsyncWakeUpCallback
+        // we shouldn't need to serialize AsyncWakeUpCallback anyways, as that class is never
+        // instantiated in deterministic mode (and trying to serialize it otherwise would be
+        // pointless)
+        const auto& wait_objects = context->thread->wait_objects;
+        if (wait_objects.empty() || wait_objects[0]->GetName() != "HLE Pause Event: RunAsync") {
+            ar & callback;
+        }
     }
     friend class boost::serialization::access;
 };

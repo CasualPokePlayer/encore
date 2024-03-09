@@ -34,7 +34,6 @@ create_target_directory_groups(encore)
 target_link_libraries(encore PRIVATE encore_common encore_core input_common)
 target_link_libraries(encore PRIVATE blip_buf glad zstd)
 target_link_libraries(encore PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads)
-set_target_properties(encore PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ENABLE_LTO})
 
 if (ENCORE_USE_PRECOMPILED_HEADERS)
     target_precompile_headers(encore PRIVATE precompiled_headers.h)
