@@ -64,8 +64,8 @@ using namespace Headless;
 
 constexpr auto ONE_MiB = 0x100000u;
 constexpr auto FOUR_MiB = ONE_MiB * 4;
-// (uncompressed) states should never be more than 300 MiB
-constexpr auto MAX_UNCOMPRESSED_STATE_SIZE = ONE_MiB * 300;
+// (uncompressed) states should never be more than 512 MiB
+constexpr auto MAX_UNCOMPRESSED_STATE_SIZE = ONE_MiB * 512;
 // (compressed) states are usually a bit less than 32MiB, but never can be sure...
 constexpr auto STARTING_COMPRESSED_STATE_SIZE = ONE_MiB * 32;
 
