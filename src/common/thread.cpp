@@ -84,7 +84,31 @@ void SetCurrentThreadPriority(ThreadPriority new_priority) {
 
 // Sets the debugger-visible name of the current thread.
 void SetCurrentThreadName(const char* name) {
-    SetThreadDescription(GetCurrentThread(), UTF8ToUTF16W(name).data());
+    // all this is necessary to avoid requiring Windows 10+
+    static auto get_set_thread_description = []() {
+        typedef HRESULT(WINAPI * pfnSetThreadDescription)(HANDLE, PCWSTR);
+        pfnSetThreadDescription pSetThreadDescription = NULL;
+        auto kernel32 = GetModuleHandle(L"kernel32.dll");
+        if (kernel32) {
+            pSetThreadDescription =
+                (pfnSetThreadDescription)GetProcAddress(kernel32, "SetThreadDescription");
+        }
+
+        if (!pSetThreadDescription) {
+            auto kernelBase = GetModuleHandle(L"KernelBase.dll");
+            if (kernelBase) {
+                pSetThreadDescription =
+                    (pfnSetThreadDescription)GetProcAddress(kernelBase, "SetThreadDescription");
+            }
+        }
+
+        return pSetThreadDescription;
+    };
+
+    static auto pSetThreadDescription = get_set_thread_description();
+    if (pSetThreadDescription) {
+        pSetThreadDescription(GetCurrentThread(), UTF8ToUTF16W(name).data());
+    }
 }
 
 #else // !MSVC_VER, so must be POSIX threads
