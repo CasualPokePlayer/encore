@@ -19,18 +19,25 @@ public:
 
     std::pair<bool, std::string> InstallCIA(const std::string& cia_path);
     std::optional<std::string> LoadROM(const std::string& rom_path);
+
     bool RunFrame();
     void Reset();
-    std::pair<u32, u32> GetVideoVirtualDimensions() const;
+
     std::pair<u32, u32> GetVideoBufferDimensions() const;
     u32 GetGLTexture() const;
     void ReadFrameBuffer(u32* dest_buffer);
+
     std::span<const s16> GetAudio() const;
+
     void ReloadConfig() const;
+
     std::size_t StartSaveState();
     void FinishSaveState(void* dest_buffer);
     void LoadState(void* src_buffer, std::size_t buffer_len) const;
+
     std::pair<const u8*, std::size_t> GetMemoryRegion(Memory::Region region) const;
+    const u8* GetPagePointer(u32 addr) const;
+
     std::tuple<Common::Rectangle<u32>, bool, bool> GetTouchScreenLayout() const;
 
 private:

@@ -54,12 +54,6 @@ ENCORE_EXPORT void Encore_Reset(EncoreContext* context) {
     context->Reset();
 }
 
-ENCORE_EXPORT void Encore_GetVideoVirtualDimensions(EncoreContext* context, u32* w, u32* h) {
-    const auto& virtual_dimensions = context->GetVideoVirtualDimensions();
-    *w = std::get<0>(virtual_dimensions);
-    *h = std::get<1>(virtual_dimensions);
-}
-
 ENCORE_EXPORT void Encore_GetVideoBufferDimensions(EncoreContext* context, u32* w, u32* h) {
     const auto& buffer_dimensions = context->GetVideoBufferDimensions();
     *w = std::get<0>(buffer_dimensions);
@@ -101,6 +95,10 @@ ENCORE_EXPORT void Encore_GetMemoryRegion(EncoreContext* context, u32 region, co
     const auto& memory_region = context->GetMemoryRegion(static_cast<Memory::Region>(region));
     *ptr = std::get<const u8*>(memory_region);
     *size = static_cast<u32>(std::get<std::size_t>(memory_region));
+}
+
+ENCORE_EXPORT const u8* Encore_GetPagePointer(EncoreContext* context, u32 addr) {
+    return context->GetPagePointer(addr);
 }
 
 ENCORE_EXPORT void Encore_GetTouchScreenLayout(EncoreContext* context, u32* x, u32* y, u32* width,

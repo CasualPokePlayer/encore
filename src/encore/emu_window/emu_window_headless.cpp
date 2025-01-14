@@ -22,10 +22,6 @@ void EmuWindow_Headless::RunFrame() {
     frame_has_passed = false;
 }
 
-std::pair<u32, u32> EmuWindow_Headless::GetVideoVirtualDimensions() const {
-    return GetVideoBufferDimensions();
-}
-
 void EmuWindow_Headless::PollEvents() {
     // this is called each frame, so we can use this as a signal that a frame has passed
     frame_has_passed = true;

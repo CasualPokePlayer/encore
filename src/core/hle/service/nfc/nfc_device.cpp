@@ -1011,21 +1011,14 @@ time_t NfcDevice::GetCurrentTime() const {
 
     // 3DS system does't allow user to set a time before Jan 1 2000,
     // so we use it as an auxiliary epoch to calculate the console time.
-    std::tm epoch_tm;
-    epoch_tm.tm_sec = 0;
-    epoch_tm.tm_min = 0;
-    epoch_tm.tm_hour = 0;
-    epoch_tm.tm_mday = 1;
-    epoch_tm.tm_mon = 0;
-    epoch_tm.tm_year = 100;
-    epoch_tm.tm_isdst = 0;
-    s64 epoch = std::mktime(&epoch_tm);
-    return static_cast<time_t>(console_time - START_DATE + epoch);
+    constexpr u64 EPOCH = 946684800ULL;
+
+    return static_cast<time_t>(console_time - START_DATE + EPOCH);
 }
 
 AmiiboDate NfcDevice::GetAmiiboDate() const {
     auto now = GetCurrentTime();
-    tm local_tm = *localtime(&now);
+    tm local_tm = *gmtime(&now);
     AmiiboDate amiibo_date{};
 
     amiibo_date.SetYear(static_cast<u16>(local_tm.tm_year + 1900));

@@ -101,19 +101,11 @@ u64 Handler::GetSystemTimeSince2000() const {
 
     // 3DS system does't allow user to set a time before Jan 1 2000,
     // so we use it as an auxiliary epoch to calculate the console time.
-    std::tm epoch_tm;
-    epoch_tm.tm_sec = 0;
-    epoch_tm.tm_min = 0;
-    epoch_tm.tm_hour = 0;
-    epoch_tm.tm_mday = 1;
-    epoch_tm.tm_mon = 0;
-    epoch_tm.tm_year = 100;
-    epoch_tm.tm_isdst = 0;
-    s64 epoch = std::mktime(&epoch_tm) * 1000;
+    constexpr u64 EPOCH = 946684800000ULL;
 
     // Only when system time is after 2000, we set it as 3DS system time
-    if (now.count() > epoch) {
-        return now.count() - epoch;
+    if (now.count() > EPOCH) {
+        return now.count() - EPOCH;
     } else {
         return 0;
     }

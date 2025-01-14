@@ -24,7 +24,6 @@ public:
 
     u32 GetGLTexture() const;
 
-    std::pair<u32, u32> GetVideoVirtualDimensions() const override;
     std::pair<u32, u32> GetVideoBufferDimensions() const override;
     void ReadFrameBuffer(u32* dest_buffer) const override;
     void ReloadConfig() override;
@@ -39,7 +38,6 @@ private:
     GLCallbackInterface const gl_interface;
     std::unique_ptr<Frontend::GraphicsContext> context;
 
-    u32 unscaled_width, unscaled_height;
     u32 width, height;
     OpenGL::OGLTexture final_texture;
     OpenGL::OGLFramebuffer final_texture_fbo;

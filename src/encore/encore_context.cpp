@@ -194,10 +194,6 @@ void EncoreContext::Reset() {
     system.Reset();
 }
 
-std::pair<u32, u32> EncoreContext::GetVideoVirtualDimensions() const {
-    return window->GetVideoVirtualDimensions();
-}
-
 std::pair<u32, u32> EncoreContext::GetVideoBufferDimensions() const {
     return window->GetVideoBufferDimensions();
 }
@@ -253,6 +249,10 @@ std::pair<const u8*, std::size_t> EncoreContext::GetMemoryRegion(Memory::Region 
     default:
         UNREACHABLE();
     }
+}
+
+const u8* EncoreContext::GetPagePointer(u32 addr) const {
+    return system.Memory().GetPointer(addr);
 }
 
 std::tuple<Common::Rectangle<u32>, bool, bool> EncoreContext::GetTouchScreenLayout() const {

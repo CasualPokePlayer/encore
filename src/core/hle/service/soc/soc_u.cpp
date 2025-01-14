@@ -2261,7 +2261,11 @@ std::optional<SOC_U::InterfaceInfo> SOC_U::GetDefaultInterfaceInfo() {
     socklen_t s_info_len = sizeof(struct sockaddr_in);
     sockaddr_in s_info;
 
+#ifdef _WIN32
+    if ((sock_fd = ::socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
+#else
     if ((sock_fd = ::socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+#endif
         return std::nullopt;
     }
 
@@ -2279,7 +2283,7 @@ std::optional<SOC_U::InterfaceInfo> SOC_U::GetDefaultInterfaceInfo() {
 
 #ifdef _WIN32
     sock_fd = WSASocket(AF_INET, SOCK_DGRAM, 0, 0, 0, 0);
-    if (sock_fd == SOCKET_ERROR) {
+    if (sock_fd == INVALID_SOCKET) {
         return std::nullopt;
     }
 
