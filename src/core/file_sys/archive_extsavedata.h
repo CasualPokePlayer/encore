@@ -108,9 +108,11 @@ std::string GetExtDataContainerPath(std::string_view mount_point, bool shared);
  */
 Path ConstructExtDataBinaryPath(u32 media_type, u32 high, u32 low);
 
+class FixSizeDiskFile;
 class ExtSaveDataDelayGenerator;
 
 } // namespace FileSys
 
+BOOST_CLASS_EXPORT_KEY(FileSys::FixSizeDiskFile);
 BOOST_CLASS_EXPORT_KEY(FileSys::ArchiveFactory_ExtSaveData)
 BOOST_CLASS_EXPORT_KEY(FileSys::ExtSaveDataDelayGenerator)

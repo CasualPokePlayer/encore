@@ -44,9 +44,9 @@ protected:
     Mode mode;
     std::unique_ptr<FileUtil::IOFile> file;
 
-private:
     DiskFile() = default;
 
+private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int) {
         ar& boost::serialization::base_object<FileBackend>(*this);
