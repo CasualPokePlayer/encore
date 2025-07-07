@@ -54,6 +54,15 @@ public:
 
 private:
     u64 size{};
+
+    FixSizeDiskFile() = default;
+
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int) {
+        ar& boost::serialization::base_object<DiskFile>(*this);
+        ar & size;
+    }
+    friend class boost::serialization::access;
 };
 
 class ExtSaveDataDelayGenerator : public DelayGenerator {
@@ -299,5 +308,6 @@ void ArchiveFactory_ExtSaveData::WriteIcon(const Path& path, std::span<const u8>
 
 } // namespace FileSys
 
+SERIALIZE_EXPORT_IMPL(FileSys::FixSizeDiskFile)
 SERIALIZE_EXPORT_IMPL(FileSys::ExtSaveDataDelayGenerator)
 SERIALIZE_EXPORT_IMPL(FileSys::ExtSaveDataArchive)
