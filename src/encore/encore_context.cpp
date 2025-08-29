@@ -84,7 +84,7 @@ std::pair<bool, std::string> EncoreContext::InstallCIA(const std::string& cia_pa
         return Service::AM::GetTitleContentPath(media_type, title_id);
     };
 
-    const auto is_executable = [](const std::string& installed_path) -> std::optional<std::string> {
+    const auto is_bootable = [](const std::string& installed_path) -> std::optional<std::string> {
         auto loader = Loader::GetLoader(installed_path);
         if (loader) {
             auto executable = false;
@@ -102,11 +102,28 @@ std::pair<bool, std::string> EncoreContext::InstallCIA(const std::string& cia_pa
                 return "Unknown error occurred while opening .app file";
             }
 
-            if (executable) {
-                return std::nullopt;
+            if (!executable) {
+                return "The .app file is not executable";
             }
 
-            return "The .app file is not executable";
+            // executable does not mean bootable per se
+            // double check that the .app is in fact bootable
+            u64 program_id = 0;
+            if (loader->ReadProgramId(program_id) != Loader::ResultStatus::Success) {
+                return "Failed to read program ID from the .app file!";
+            }
+
+            const auto is_3ds = ((program_id >> 48) & 0xFFFF) == 4;
+            if (!is_3ds) {
+                return "The .app file is not a 3DS title!";
+            }
+
+            const auto content_category = (program_id >> 32) & 0xFFFF;
+            if (content_category & 0x8) {
+                return "The .app file is not bootable";
+            }
+
+            return std::nullopt;
         }
 
         return "Failed to get loader for .app file";
@@ -115,9 +132,9 @@ std::pair<bool, std::string> EncoreContext::InstallCIA(const std::string& cia_pa
     // if the CIA is already installed, don't reinstall it
     const auto& maybe_installed_path = get_installed_path();
     if (FileUtil::Exists(maybe_installed_path)) {
-        const auto& maybe_executable_result = is_executable(maybe_installed_path);
-        if (maybe_executable_result) {
-            return std::make_pair(false, *maybe_executable_result);
+        const auto& maybe_bootable_result = is_bootable(maybe_installed_path);
+        if (maybe_bootable_result) {
+            return std::make_pair(false, *maybe_bootable_result);
         }
 
         return std::make_pair(true, maybe_installed_path);
@@ -144,9 +161,9 @@ std::pair<bool, std::string> EncoreContext::InstallCIA(const std::string& cia_pa
     }
 
     const auto& installed_path = get_installed_path();
-    const auto& executable_result = is_executable(installed_path);
-    if (executable_result) {
-        return std::make_pair(false, *executable_result);
+    const auto& bootable_result = is_bootable(installed_path);
+    if (bootable_result) {
+        return std::make_pair(false, *bootable_result);
     }
 
     return std::make_pair(true, installed_path);
