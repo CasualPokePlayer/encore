@@ -229,6 +229,7 @@ void EncoreContext::FinishSaveState(void* dest_buffer) {
 void EncoreContext::LoadState(void* src_buffer, std::size_t buffer_len) const {
     window->MakeCurrent();
     savestate_mt->LoadState(src_buffer, buffer_len);
+    window->ForcePresent();
 }
 
 std::pair<const u8*, std::size_t> EncoreContext::GetMemoryRegion(Memory::Region region) const {

@@ -16,6 +16,7 @@ public:
     virtual ~EmuWindow_Headless();
 
     void RunFrame();
+    void ForcePresent();
 
     virtual std::pair<u32, u32> GetVideoBufferDimensions() const = 0;
     virtual void ReadFrameBuffer(u32* dest_buffer) const = 0;

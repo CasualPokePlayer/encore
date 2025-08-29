@@ -3,6 +3,8 @@
 // Refer to the license.txt file included.
 
 #include "emu_window_headless.h"
+#include "video_core/gpu.h"
+#include "video_core/renderer_base.h"
 
 using namespace Headless;
 
@@ -25,4 +27,11 @@ void EmuWindow_Headless::RunFrame() {
 void EmuWindow_Headless::PollEvents() {
     // this is called each frame, so we can use this as a signal that a frame has passed
     frame_has_passed = true;
+}
+
+void EmuWindow_Headless::ForcePresent() {
+    system.GPU().Renderer().SwapBuffers();
+    Present();
+    // PollEvents will get called in SwapBuffers, so make sure we keep frame_has_passed false
+    frame_has_passed = false;
 }
