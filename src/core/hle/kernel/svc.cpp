@@ -347,6 +347,16 @@ enum class ControlProcessOP {
     PROCESSOP_DISABLE_CREATE_THREAD_RESTRICTIONS,
 };
 
+/**
+ * Accepted by the custom svcMapProcessMemoryEx.
+ */
+enum class MapMemoryExFlag {
+    /**
+     * Maps the memory region as PRIVATE instead of SHARED
+     */
+    MAPEXFLAGS_PRIVATE = (1 << 0),
+};
+
 class SVC : public SVCWrapper<SVC> {
 public:
     SVC(Core::System& system);
@@ -382,6 +392,9 @@ private:
                                 s64 nano_seconds);
     Result ReplyAndReceive(s32* index, VAddr handles_address, s32 handle_count,
                            Handle reply_target);
+    Result InvalidateProcessDataCache(Handle process_handle, VAddr address, u32 size);
+    Result StoreProcessDataCache(Handle process_handle, VAddr address, u32 size);
+    Result FlushProcessDataCache(Handle process_handle, VAddr address, u32 size);
     Result CreateAddressArbiter(Handle* out_handle);
     Result ArbitrateAddress(Handle handle, u32 address, u32 type, u32 value, s64 nanoseconds);
     void Break(u8 break_reason);
@@ -435,7 +448,8 @@ private:
     Result InvalidateEntireInstructionCache();
     u32 ConvertVaToPa(u32 addr);
     Result MapProcessMemoryEx(Handle dst_process_handle, u32 dst_address, Handle src_process_handle,
-                              u32 src_address, u32 size);
+                              u32 src_address, u32 size, MapMemoryExFlag flags,
+                              Handle dst_process_handle_backup);
     Result UnmapProcessMemoryEx(Handle process, u32 dst_address, u32 size);
     Result ControlProcess(Handle process_handle, u32 process_OP, u32 varg2, u32 varg3);
 
@@ -445,6 +459,7 @@ private:
         u32 id;
         Func func;
         const char* name;
+        u32 cycles;
     };
 
     static const std::array<FunctionDef, 180> SVC_Table;
@@ -1002,6 +1017,39 @@ Result SVC::ReplyAndReceive(s32* index, VAddr handles_address, s32 handle_count,
     // signal in one of its wait objects, or to 0xC8A01836 if there was a translation error.
     // By default the index is set to -1.
     *index = -1;
+    return ResultSuccess;
+}
+
+/// Invalidates the specified cache range (stubbed as we do not emulate cache).
+Result SVC::InvalidateProcessDataCache(Handle process_handle, VAddr address, u32 size) {
+    const std::shared_ptr<Process> process =
+        kernel.GetCurrentProcess()->handle_table.Get<Process>(process_handle);
+    R_UNLESS(process, ResultInvalidHandle);
+
+    LOG_DEBUG(Kernel_SVC, "called address=0x{:08X}, size=0x{:08X}", address, size);
+
+    return ResultSuccess;
+}
+
+/// Stores the specified cache range (stubbed as we do not emulate cache).
+Result SVC::StoreProcessDataCache(Handle process_handle, VAddr address, u32 size) {
+    const std::shared_ptr<Process> process =
+        kernel.GetCurrentProcess()->handle_table.Get<Process>(process_handle);
+    R_UNLESS(process, ResultInvalidHandle);
+
+    LOG_DEBUG(Kernel_SVC, "called address=0x{:08X}, size=0x{:08X}", address, size);
+
+    return ResultSuccess;
+}
+
+/// Flushes the specified cache range (stubbed as we do not emulate cache).
+Result SVC::FlushProcessDataCache(Handle process_handle, VAddr address, u32 size) {
+    const std::shared_ptr<Process> process =
+        kernel.GetCurrentProcess()->handle_table.Get<Process>(process_handle);
+    R_UNLESS(process, ResultInvalidHandle);
+
+    LOG_DEBUG(Kernel_SVC, "called address=0x{:08X}, size=0x{:08X}", address, size);
+
     return ResultSuccess;
 }
 
@@ -1926,7 +1974,22 @@ u32 SVC::ConvertVaToPa(u32 addr) {
 }
 
 Result SVC::MapProcessMemoryEx(Handle dst_process_handle, u32 dst_address,
-                               Handle src_process_handle, u32 src_address, u32 size) {
+                               Handle src_process_handle, u32 src_address, u32 size,
+                               MapMemoryExFlag flags, Handle dst_process_handle_backup) {
+
+    // Determine if this is the second version of the svc by checking the value at R0.
+    constexpr u32 SVC_VERSION2_MAGIC = 0xFFFFFFF2;
+    if (static_cast<u32>(dst_process_handle) == SVC_VERSION2_MAGIC) {
+        // Version 2, actual handle is provided in 6th argument
+        dst_process_handle = dst_process_handle_backup;
+    } else {
+        // Version 1, the flags argument is not used
+        flags = static_cast<MapMemoryExFlag>(0);
+    }
+
+    const bool map_as_private =
+        (static_cast<u32>(flags) & static_cast<u32>(MapMemoryExFlag::MAPEXFLAGS_PRIVATE)) != 0;
+
     std::shared_ptr<Process> dst_process =
         kernel.GetCurrentProcess()->handle_table.Get<Process>(dst_process_handle);
     std::shared_ptr<Process> src_process =
@@ -1941,8 +2004,7 @@ Result SVC::MapProcessMemoryEx(Handle dst_process_handle, u32 dst_address,
     // Only linear memory supported
     auto vma = src_process->vm_manager.FindVMA(src_address);
     R_UNLESS(vma != src_process->vm_manager.vma_map.end() &&
-                 vma->second.type == VMAType::BackingMemory &&
-                 vma->second.meminfo_state == MemoryState::Continuous,
+                 vma->second.type == VMAType::BackingMemory,
              ResultInvalidAddress);
 
     const u32 offset = src_address - vma->second.base;
@@ -1952,7 +2014,7 @@ Result SVC::MapProcessMemoryEx(Handle dst_process_handle, u32 dst_address,
         dst_address,
         memory.GetFCRAMRef(vma->second.backing_memory.GetPtr() + offset -
                            kernel.memory.GetFCRAMPointer(0)),
-        size, Kernel::MemoryState::Continuous);
+        size, map_as_private ? MemoryState::Private : MemoryState::Shared);
 
     if (!vma_res.Succeeded()) {
         return ResultInvalidAddressState;
@@ -1974,8 +2036,7 @@ Result SVC::UnmapProcessMemoryEx(Handle process, u32 dst_address, u32 size) {
     // Only linear memory supported
     auto vma = dst_process->vm_manager.FindVMA(dst_address);
     R_UNLESS(vma != dst_process->vm_manager.vma_map.end() &&
-                 vma->second.type == VMAType::BackingMemory &&
-                 vma->second.meminfo_state == MemoryState::Continuous,
+                 vma->second.type == VMAType::BackingMemory,
              ResultInvalidAddress);
 
     dst_process->vm_manager.UnmapRange(dst_address, size);
@@ -2124,9 +2185,9 @@ const std::array<SVC::FunctionDef, 180> SVC::SVC_Table{{
     {0x4F, &SVC::Wrap<&SVC::ReplyAndReceive>, "ReplyAndReceive"},
     {0x50, nullptr, "BindInterrupt"},
     {0x51, nullptr, "UnbindInterrupt"},
-    {0x52, nullptr, "InvalidateProcessDataCache"},
-    {0x53, nullptr, "StoreProcessDataCache"},
-    {0x54, nullptr, "FlushProcessDataCache"},
+    {0x52, &SVC::Wrap<&SVC::InvalidateProcessDataCache>, "InvalidateProcessDataCache"},
+    {0x53, &SVC::Wrap<&SVC::StoreProcessDataCache>, "StoreProcessDataCache"},
+    {0x54, &SVC::Wrap<&SVC::FlushProcessDataCache>, "FlushProcessDataCache"},
     {0x55, nullptr, "StartInterProcessDma"},
     {0x56, nullptr, "StopDma"},
     {0x57, nullptr, "GetDmaState"},
@@ -2250,7 +2311,7 @@ void SVC::CallSVC(u32 immediate) {
         if (info->func) {
             (this->*(info->func))();
         } else {
-            LOG_ERROR(Kernel_SVC, "unimplemented SVC function {}(..)", info->name);
+            LOG_ERROR(Kernel_SVC, "unimplemented SVC function {:02X} {}(..)", info->id, info->name);
         }
     }
 }
